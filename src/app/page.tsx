@@ -1,65 +1,212 @@
 import Image from "next/image";
+import Link from "next/link";
+import { InstagramIcon, DiscordIcon } from "@/components/icons";
+import { getUpcomingMeetups, formatMeetupDateTime } from "@/lib/meetupSchedule";
+import Footer from "@/components/footer";
+import Header from "@/components/header";
 
-export default function Home() {
+const LINKS = {
+  instagram: "https://www.instagram.com/fortworthfilmmakers",
+  discord: "https://discord.gg/aJrsuTHg5Z",
+};
+
+function Pill({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/75">
+      {children}
+    </span>
+  );
+}
+
+export default function HomePage() {
+  const { next, alsoComingUp } = getUpcomingMeetups();
+
+  return (
+    <div className="film-grain relative flex flex-1 flex-col overflow-hidden bg-[#05060a] text-white">
+      {/* Background: gradients + vignette */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-white/10 blur-3xl" />
+        <div className="absolute -bottom-52 right-[-120px] h-[520px] w-[520px] rounded-full bg-white/10 blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black" />
+        <div className="absolute inset-0 [box-shadow:inset_0_0_120px_rgba(0,0,0,0.85)]" />
+      </div>
+
+      {/* Top nav */}
+      <Header activeHref="/" />
+
+      {/* Main content grows to fill space */}
+      <main className="relative z-10 flex-1">
+        <section>
+          <div className="mx-auto grid max-w-6xl gap-10 px-5 pb-14 pt-10 sm:px-6 sm:pt-14 lg:grid-cols-12 lg:items-center">
+            <div className="lg:col-span-7">
+              <div className="mb-5 flex flex-wrap gap-2">
+                <Pill>Fort Worth</Pill>
+                <Pill>Indie-first</Pill>
+                <Pill>Talent spotlight</Pill>
+                <Pill>Meet. Crew. Shoot.</Pill>
+              </div>
+
+              <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
+                A home for indie filmmakers in Fort Worth.
+              </h1>
+
+              <p className="mt-5 max-w-2xl text-pretty text-base text-white/70 sm:text-lg">
+                We grow local projects, connect crews, and highlight talent;
+                working to help strong work reach wider audiences.
+              </p>
+
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <Link
+                  href={LINKS.instagram}
+                  target="_blank"
+                  className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black hover:opacity-90"
+                >
+                  <InstagramIcon className="h-4 w-4" />
+                  Follow on Instagram
+                </Link>
+
+                <Link
+                  href={LINKS.discord}
+                  target="_blank"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white hover:bg-white/10"
+                >
+                  <DiscordIcon className="h-4 w-4" />
+                  Join the Discord
+                </Link>
+
+                <Link
+                  href="/members"
+                  className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-transparent px-5 py-3 text-sm font-semibold text-white hover:bg-white/10"
+                >
+                  Browse Members
+                </Link>
+              </div>
+            </div>
+
+            {/* Right “poster card” */}
+            <div className="lg:col-span-5">
+              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-5 shadow-[0_30px_100px_rgba(0,0,0,0.65)]">
+                <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-black/30" />
+
+                <div className="relative">
+                  {/* Header row */}
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="text-sm font-semibold">
+                      Upcoming meetups
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-2">
+                      <div className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white/70">
+                        Central Time
+                      </div>
+                      <div className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-white/70">
+                        Local first
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Meetups: side-by-side on sm, stacked on lg (because the right column becomes narrow) */}
+                  <div className="mt-4 grid items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                    <div className="h-full rounded-2xl border border-white/10 bg-black/35 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="text-sm font-semibold">Next</div>
+                      </div>
+
+                      <div className="mt-2 text-sm text-white/90">
+                        {next.title}
+                      </div>
+                      <div className="mt-1 text-sm text-white/70">
+                        TBA
+                        {/* {formatMeetupDateTime(next.when)} */}
+                      </div>
+                      <div className="mt-1 text-sm text-white/60">
+                        Fort Worth
+                        {/* {next.locationName}; {next.locationCity} */}
+                      </div>
+                    </div>
+
+                    {/*  
+                    <div className="h-full rounded-2xl border border-white/10 bg-black/25 p-4">
+                      <div className="text-sm font-semibold text-white/80">
+                        Also coming up
+                      </div>
+                      <div className="mt-2 text-sm text-white/85">
+                        {alsoComingUp.title}
+                      </div>
+                      <div className="mt-1 text-sm text-white/70">
+                        {formatMeetupDateTime(alsoComingUp.when)}
+                        TBA
+                      </div>
+                      <div className="mt-1 text-sm text-white/60">
+                        {alsoComingUp.locationName}; {alsoComingUp.locationCity} 
+                        Arlington
+                      </div>
+                    </div>*/}
+                  </div>
+
+                  <div className="mt-3 text-xs text-white/55">
+                    Any changes or special events are posted on Instagram and
+                    Discord.
+                  </div>
+
+                  <div className="mt-5 grid gap-3">
+                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                      <div className="text-xs text-white/60">What happens</div>
+                      <div className="mt-1 text-sm">
+                        Introductions, crew matchmaking, project pitches,
+                        feedback, and collabs.
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                      <div className="text-xs text-white/60">
+                        Talent directory
+                      </div>
+                      <div className="mt-1 text-sm text-white/80">
+                        A growing list of DPs, editors, sound, composers,
+                        actors, producers, and more.
+                      </div>
+                      <Link
+                        href="/members"
+                        className="mt-3 inline-flex text-sm font-semibold text-white underline underline-offset-4 hover:opacity-90"
+                      >
+                        Explore members
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex gap-3">
+                    <Link
+                      href={LINKS.instagram}
+                      target="_blank"
+                      className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl border border-white/12 bg-white/5 px-4 py-3 text-center text-sm font-semibold hover:bg-white/10"
+                    >
+                      <InstagramIcon className="h-4 w-4" />
+                      <span className="hidden sm:inline">Instagram</span>
+                    </Link>
+
+                    <Link
+                      href={LINKS.discord}
+                      target="_blank"
+                      className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl border border-white/12 bg-white/5 px-4 py-3 text-center text-sm font-semibold hover:bg-white/10"
+                    >
+                      <DiscordIcon className="h-4 w-4" />
+                      <span className="hidden sm:inline">Discord</span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 text-center text-xs text-white/45">
+                “Don’t pay attention to the industry. Do your own thing. Make
+                your own industry. Break open the form!” - Martin Scorsese
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
+
+      <Footer instagramUrl={LINKS.instagram} discordUrl={LINKS.discord} />
     </div>
   );
 }
