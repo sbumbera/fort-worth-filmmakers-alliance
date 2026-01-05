@@ -159,13 +159,16 @@ export function EmailIcon({ className }: { className?: string }) {
 /** Use this for generic "Website" buttons. */
 export function IMDbIcon({ className }: { className?: string }) {
   return (
-    <span className={className} aria-hidden="true">
+    <span
+      className={`relative inline-block ${className ?? ""}`}
+      aria-hidden="true"
+    >
       <Image
         src="/icons/imdb.svg"
         alt="IMDb"
-        width={36}
-        height={18}
-        className="h-full w-full object-contain"
+        fill
+        sizes="64px"
+        className="object-contain"
         priority={false}
       />
     </span>

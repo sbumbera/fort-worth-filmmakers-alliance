@@ -157,11 +157,8 @@ const ROLE_ALIASES: Record<string, string[]> = {
 
 function canonicalizeRoleForSearch(role: string) {
   const r = normalize(role);
-
-  // Force any “lead actor”, “supporting actor”, etc into Actor or Actress if someone ever adds them by accident.
   if (r.includes("actress")) return "actress";
   if (r.includes("actor")) return "actor";
-
   return r;
 }
 
@@ -175,7 +172,6 @@ function roleTokens(roles: string[]) {
     const aliases = ROLE_ALIASES[canonical];
     if (aliases?.length) tokens.push(...aliases.map(normalize));
 
-    // Pull acronym inside parentheses
     const match = role.match(/\(([^)]+)\)/);
     if (match?.[1]) {
       const inside = match[1].trim();
@@ -190,13 +186,11 @@ function matchesQuery(haystack: string, q: string) {
   const query = normalize(q);
   if (!query) return true;
 
-  // 1–2 chars: whole word only (prevents pa matching paul)
   if (query.length <= 2) {
     const re = new RegExp(`\\b${escapeRegex(query)}\\b`, "i");
     return re.test(haystack);
   }
 
-  // >=3: word-start matching only (prevents random mid-word matches)
   const re = new RegExp(`\\b${escapeRegex(query)}`, "i");
   return re.test(haystack);
 }
@@ -254,7 +248,7 @@ function ExternalLinkButton({ link }: { link: MemberLink }) {
     ) : kind === "linkedin" ? (
       <LinkedInIcon className="h-4 w-4" />
     ) : kind === "imdb" ? (
-      <IMDbIcon className="h-4 w-4" />
+      <IMDbIcon className="h-4 w-7" />
     ) : kind === "backstage" ? (
       <BackstageIcon className="h-4 w-4" />
     ) : (
@@ -265,10 +259,13 @@ function ExternalLinkButton({ link }: { link: MemberLink }) {
     <Link
       href={link.href}
       target={isExternal ? "_blank" : undefined}
-      className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/85 hover:bg-white/10 hover:text-white"
+      rel={isExternal ? "noopener noreferrer" : undefined}
+      className={cn(
+        "inline-flex min-w-0 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/85 hover:bg-white/10 hover:text-white"
+      )}
     >
-      {icon}
-      <span className="whitespace-nowrap">{label}</span>
+      <span className="shrink-0">{icon}</span>
+      <span className="min-w-0 truncate">{label}</span>
     </Link>
   );
 }
@@ -278,8 +275,8 @@ function MemberCard({ member }: { member: Member }) {
   const socials = member.links.filter((l) => l.kind !== "website");
 
   return (
-    <div className="flex min-h-[260px] flex-col rounded-3xl border border-white/10 bg-black/25 p-5">
-      <div className="flex items-start justify-between gap-4">
+    <div className="flex min-h-[260px] min-w-0 flex-col rounded-3xl border border-white/10 bg-black/25 p-5">
+      <div className="flex min-w-0 items-start justify-between gap-4">
         <div className="flex min-w-0 items-start gap-4">
           <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-white/10 bg-white/5">
             <Image
@@ -306,7 +303,7 @@ function MemberCard({ member }: { member: Member }) {
                 <span className="text-white/25">•</span>
               ) : null}
 
-              <span className="line-clamp-1 text-white/70">
+              <span className="line-clamp-1 min-w-0 text-white/70">
                 {member.roles.join(" · ")}
               </span>
             </div>
@@ -354,6 +351,7 @@ function GetListedCallout({ className }: { className?: string }) {
         <Link
           href={FWFA_LINKS.discord}
           target="_blank"
+          rel="noopener noreferrer"
           className="inline-flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-sm font-semibold text-black hover:opacity-90"
         >
           <DiscordIcon className="h-4 w-4" />
@@ -363,6 +361,7 @@ function GetListedCallout({ className }: { className?: string }) {
         <Link
           href={FWFA_LINKS.instagram}
           target="_blank"
+          rel="noopener noreferrer"
           className="inline-flex items-center gap-2 rounded-xl border border-white/12 bg-white/5 px-3 py-2 text-sm font-semibold text-white hover:bg-white/10"
         >
           <InstagramIcon className="h-4 w-4" />
@@ -375,12 +374,8 @@ function GetListedCallout({ className }: { className?: string }) {
 
 const ROLE_OPTIONS: string[] = [
   "All roles",
-
-  // Acting (simple)
   "Actor",
   "Actress",
-
-  // Above the line (creative leadership)
   "Producer",
   "Executive Producer",
   "Co-Producer",
@@ -390,18 +385,14 @@ const ROLE_OPTIONS: string[] = [
   "Production Coordinator",
   "Production Secretary",
   "Production Assistant (PA)",
-
   "Director",
   "1st Assistant Director (1st AD)",
   "2nd Assistant Director (2nd AD)",
   "2nd 2nd Assistant Director (2nd 2nd AD)",
   "Script Supervisor",
-
   "Writer",
   "Screenwriter",
   "Showrunner",
-
-  // Camera
   "Director of Photography (DP)",
   "Cinematographer",
   "Camera Operator",
@@ -413,25 +404,17 @@ const ROLE_OPTIONS: string[] = [
   "Drone Pilot",
   "Photographer",
   "Unit Stills Photographer",
-
-  // Electric / Lighting
   "Gaffer",
   "Best Boy Electric",
   "Electrician",
   "Lighting Technician",
-
-  // Grip
   "Key Grip",
   "Best Boy Grip",
   "Grip",
   "Dolly Grip",
-
-  // Sound
   "Production Sound Mixer",
   "Boom Operator",
   "Sound Utility",
-
-  // Art Department
   "Production Designer",
   "Art Director",
   "Set Decorator",
@@ -441,35 +424,23 @@ const ROLE_OPTIONS: string[] = [
   "Construction Coordinator",
   "Scenic Artist",
   "Graphic Designer (Art Dept)",
-
-  // Wardrobe
   "Costume Designer",
   "Wardrobe Supervisor",
   "Costumer",
   "Set Costumer",
-
-  // Hair and Makeup
   "Key Makeup Artist",
   "Makeup Artist",
   "Key Hair Stylist",
   "Hair Stylist",
   "SFX Makeup Artist",
-
-  // Locations
   "Location Manager",
   "Assistant Location Manager",
   "Location Scout",
-
-  // Transportation
   "Transportation Coordinator",
   "Driver",
   "Picture Car Coordinator",
-
-  // Production services
   "Craft Service",
   "Catering",
-
-  // Post
   "Editor",
   "Assistant Editor",
   "Colorist",
@@ -479,8 +450,6 @@ const ROLE_OPTIONS: string[] = [
   "VFX Supervisor",
   "VFX Artist",
   "Motion Graphics Designer",
-
-  // Other
   "Production Accountant",
   "Safety Officer",
 ];
@@ -513,7 +482,9 @@ export default function MembersPage() {
   }, [query, role]);
 
   return (
-    <div className="film-grain relative flex flex-1 flex-col overflow-hidden bg-[#05060a] text-white">
+    // KEY FIX: overflow-hidden on the OUTERMOST wrapper (same as /about)
+    <main className="film-grain relative min-h-screen overflow-hidden bg-[#05060a] text-white">
+      {/* Background */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute -bottom-52 right-[-120px] h-[520px] w-[520px] rounded-full bg-white/10 blur-3xl" />
@@ -523,8 +494,8 @@ export default function MembersPage() {
 
       <Header />
 
-      <main className="relative z-10 flex-1">
-        <section className="mx-auto max-w-6xl px-5 pb-14 pt-10 sm:px-6 sm:pt-14">
+      <section className="relative z-10">
+        <div className="mx-auto max-w-6xl px-5 pb-14 pt-10 sm:px-6 sm:pt-14">
           <div className="flex flex-col gap-3">
             <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
               Local talent and crew
@@ -540,22 +511,22 @@ export default function MembersPage() {
           </div>
 
           <div className="mt-6 grid gap-3 rounded-3xl border border-white/10 bg-white/5 p-4 sm:grid-cols-5 sm:items-center">
-            <div className="sm:col-span-3">
+            <div className="min-w-0 sm:col-span-3">
               <label className="block text-xs text-white/60">Search</label>
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Type a name, role, city, or keyword (e.g., PA, DP, acting)…"
-                className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/90 placeholder:text-white/40 outline-none focus:border-white/20"
+                className="mt-1 w-full min-w-0 rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/90 placeholder:text-white/40 outline-none focus:border-white/20"
               />
             </div>
 
-            <div className="sm:col-span-2">
+            <div className="min-w-0 sm:col-span-2">
               <label className="block text-xs text-white/60">Role</label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/90 outline-none focus:border-white/20"
+                className="mt-1 w-full min-w-0 rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/90 outline-none focus:border-white/20"
               >
                 {ROLE_OPTIONS.map((opt) => (
                   <option key={opt} value={opt}>
@@ -589,10 +560,10 @@ export default function MembersPage() {
           <div className="mt-10">
             <GetListedCallout />
           </div>
-        </section>
-      </main>
 
-      <Footer />
-    </div>
+          <Footer />
+        </div>
+      </section>
+    </main>
   );
 }
