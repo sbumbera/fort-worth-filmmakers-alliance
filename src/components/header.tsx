@@ -23,7 +23,7 @@ type HeaderProps = {
 const DEFAULT_NAV: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
-  { label: "Members", href: "/members" },
+  { label: "Local Roster", href: "/roster" },
   { label: "Resources", href: "/resources" },
 ];
 
