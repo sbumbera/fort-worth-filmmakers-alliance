@@ -93,7 +93,7 @@ export const MEMBERS: Member[] = [
     roles: ["Actress"],
     bio: "Mariana tried to pursue acting while living in Los Angeles but ended up moving to Maryland to care for her father. 5 years later, she found herself giving acting a second try now that she has moved to Texas. She is excited to see how much the industry has grown here and honored to attempt to represent Texas as a local actress, amongst so many kind and talented professionals.",
     image: {
-      src: "/members/m-repetto.jpg",
+      src: "/members/m-repetto2.jpg",
       alt: "Marianna Repetto",
     },
     links: [
