@@ -1,7 +1,7 @@
 export const MEETUPS = {
   timezone: "America/Chicago", // Central Time: correct for DFW
   weekly: {
-    title: "FWFA Weekly Meetup",
+    title: "FWF Weekly Meetup",
     dayOfWeek: 2, // Tuesday
     hour24: 19, // 7 PM
     minute: 0,
@@ -9,7 +9,7 @@ export const MEETUPS = {
     locationCity: "Fort Worth, TX",
   },
   monthly: {
-    title: "DFA + FWFA Monthly Mixer",
+    title: "DFA + FWF Monthly Mixer",
     nth: 1, // first
     dayOfWeek: 4, // Thursday
     hour24: 19, // 7 PM

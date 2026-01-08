@@ -334,7 +334,7 @@ export const SECTIONS: ResourceSection[] = [
         keywords: ["TAMMP", "TxAMMP"],
       },
       {
-        name: "Fort Worth Filmmakers Alliance (FWFA)",
+        name: "Fort Worth Filmmakers (FWF)",
         location: "Fort Worth",
         description:
           "A nonprofit filmmaker community based in Fort Worth focused on connecting local crew and talent, supporting independent projects, and strengthening North Texas’s film ecosystem through collaboration and visibility.",
@@ -355,7 +355,7 @@ export const SECTIONS: ResourceSection[] = [
             label: "Discord",
           },
         ],
-        keywords: ["FWFA", "Fort Worth Filmmakers"],
+        keywords: ["FWF", "Fort Worth Filmmakers"],
       },
       {
         name: "Ladies in Film & Television (Dallas)",
