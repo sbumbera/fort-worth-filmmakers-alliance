@@ -82,7 +82,7 @@ export default function AboutPage() {
                 <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-black/30" />
                 <Image
                   src="/brand/logo.png"
-                  alt="Fort Worth Filmmakers Alliance logo"
+                  alt="Fort Worth Filmmakers logo"
                   fill
                   className="relative object-contain p-7"
                   priority
@@ -227,7 +227,7 @@ export default function AboutPage() {
                 <SectionTitle
                   eyebrow="The ecosystem"
                   title="DFW already has major pieces"
-                  subtitle="Commissions, unions, festivals, schools, and professional groups are active. FWFA complements them by focusing on consistent collaboration and talent discovery in Fort Worth."
+                  subtitle="Commissions, unions, festivals, schools, and professional groups are active. FWF complements them by focusing on consistent collaboration and talent discovery in Fort Worth."
                 />
 
                 <div className="mt-5 grid gap-3">
@@ -287,10 +287,10 @@ export default function AboutPage() {
 
             {/* Right column */}
             <div className="lg:col-span-5">
-              {/* FWFA story */}
+              {/* FWF story */}
               <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
                 <SectionTitle
-                  eyebrow="FWFA"
+                  eyebrow="FWF"
                   title="We are building the Fort Worth layer."
                   subtitle="Not hype. Not gatekeeping. Consistent meetups, real crew matching, and a talent directory people can actually use."
                 />
@@ -309,7 +309,7 @@ export default function AboutPage() {
                     <div className="mt-2 text-sm text-white/80">
                       As DFW grows, producers need reliable local crews and a
                       visible roster. Independents need access to collaborators.
-                      FWFA sits in the middle: connecting the local indie scene
+                      FWF sits in the middle: connecting the local indie scene
                       to a more professional production ecosystem.
                     </div>
                   </div>
