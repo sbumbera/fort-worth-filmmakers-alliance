@@ -13,7 +13,7 @@ type FooterProps = {
 export default function Footer({
   instagramUrl = "https://www.instagram.com/fortworthfilmmakers",
   discordUrl = "https://discord.gg/aJrsuTHg5Z",
-  orgName = "Fort Worth Filmmakers Alliance",
+  orgName = "Fort Worth Filmmakers",
   className = "",
 }: FooterProps) {
   return (

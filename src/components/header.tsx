@@ -29,7 +29,7 @@ const DEFAULT_NAV: NavItem[] = [
 
 export default function Header({
   activeHref,
-  orgName = "Fort Worth Filmmakers Alliance",
+  orgName = "Fort Worth Filmmakers",
   tagline = "Nonprofit community",
   logoSrc = "/brand/logo.png",
   navItems = DEFAULT_NAV,
