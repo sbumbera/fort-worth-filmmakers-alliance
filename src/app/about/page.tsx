@@ -7,11 +7,28 @@ import Header from "@/components/header";
 const LINKS = {
   instagram: "https://www.instagram.com/fortworthfilmmakers",
   discord: "https://discord.gg/aJrsuTHg5Z",
+  roster: "https://fwfilmmakers.org/roster",
+  directory: "https://fwfilmmakers.org/directory",
+  tools: "https://fwfilmmakers.org/tools",
+  nonUnionCalc: "https://fwfilmmakers.org/tools/nonunioncalc",
 };
 
-function Pill({ children }: { children: React.ReactNode }) {
+function Pill({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/75">
+    <span
+      className={[
+        "inline-flex shrink-0 items-center whitespace-nowrap rounded-full",
+        "bg-white/0 px-2.5 py-1 text-[11px] leading-none text-white/60",
+        "ring-1 ring-white/10",
+        className,
+      ].join(" ")}
+    >
       {children}
     </span>
   );
@@ -35,25 +52,71 @@ function Stat({
   );
 }
 
-function SectionTitle({
-  eyebrow,
+function Card({
   title,
-  subtitle,
+  eyebrow,
+  children,
 }: {
-  eyebrow: string;
-  title: string;
-  subtitle?: string;
+  title?: string;
+  eyebrow?: string;
+  children: React.ReactNode;
 }) {
   return (
-    <div>
-      <div className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
-        {eyebrow}
-      </div>
-      <h2 className="mt-2 text-xl font-semibold">{title}</h2>
-      {subtitle ? (
-        <p className="mt-2 text-sm text-white/65">{subtitle}</p>
+    <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+      {eyebrow || title ? (
+        <div className="mb-4">
+          {eyebrow ? (
+            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
+              {eyebrow}
+            </div>
+          ) : null}
+          {title ? (
+            <h3 className="mt-2 text-lg font-semibold">{title}</h3>
+          ) : null}
+        </div>
       ) : null}
+      {children}
     </div>
+  );
+}
+
+function Bullet({ title, body }: { title: string; body: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+      <div className="text-sm font-semibold">{title}</div>
+      <div className="mt-2 text-sm text-white/75">{body}</div>
+    </div>
+  );
+}
+
+function Divider() {
+  return <div className="my-10 h-px w-full bg-white/10" />;
+}
+
+function LinkCard({
+  href,
+  label,
+  caption,
+}: {
+  href: string;
+  label: string;
+  caption: string;
+}) {
+  return (
+    <Link
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="group flex items-start justify-between gap-3 rounded-2xl border border-white/12 bg-black/30 px-4 py-3 hover:bg-white/5"
+    >
+      <div className="min-w-0">
+        <div className="text-sm font-semibold text-white">{label}</div>
+        <div className="mt-1 text-xs text-white/60">{caption}</div>
+      </div>
+      <div className="mt-0.5 shrink-0 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-white/70 group-hover:bg-white/10">
+        Open
+      </div>
+    </Link>
   );
 }
 
@@ -71,14 +134,13 @@ export default function AboutPage() {
       {/* Top nav */}
       <Header activeHref="/about" />
 
-      {/* Main content grows */}
-      <main className="relative z-10 flex-1">
+      <main className="relative z-10 flex-1 overflow-x-hidden">
         {/* Hero */}
         <section>
-          <div className="mx-auto max-w-6xl px-5 pt-8 sm:px-6 sm:pt-10">
+          <div className="mx-auto max-w-5xl px-5 pt-8 sm:px-6 sm:pt-10">
             <div className="grid items-center gap-10 lg:grid-cols-12">
-              <div className="lg:col-span-5">
-                <div className="relative mx-auto h-52 w-52 overflow-hidden rounded-[28px] border border-white/10 bg-white/5 p-3 shadow-[0_30px_100px_rgba(0,0,0,0.65)] sm:h-72 sm:w-72 lg:mx-0">
+              <div className="lg:col-span-4">
+                <div className="relative mx-auto h-52 w-52 overflow-hidden rounded-[28px] border border-white/10 bg-white/5 p-3 shadow-[0_30px_100px_rgba(0,0,0,0.65)] sm:h-64 sm:w-64 lg:mx-0">
                   <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-black/30" />
                   <Image
                     src="/brand/logo.png"
@@ -90,30 +152,55 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              <div className="lg:col-span-7">
-                <div className="flex flex-wrap gap-2">
+              <div className="lg:col-span-8 min-w-0">
+                {/* MOBILE: simple metadata line (no pills, no nav confusion) */}
+                <div className="sm:hidden flex flex-wrap items-center text-[11px] leading-snug text-white/55">
+                  {[
+                    "Fort Worth",
+                    "Indie-first",
+                    "Meetups",
+                    "Open roster",
+                    "Directory",
+                    "Tools",
+                    "Learn. Collaborate. Scale.",
+                  ].map((t) => (
+                    <span
+                      key={t}
+                      className="after:mx-2 after:text-white/25 after:content-['•'] last:after:content-['']"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+
+                {/* DESKTOP+: pills */}
+                <div className="hidden sm:flex sm:flex-wrap sm:gap-2">
                   <Pill>Fort Worth</Pill>
                   <Pill>Indie-first</Pill>
-                  <Pill>Talent spotlight</Pill>
-                  <Pill>Meet. Crew. Shoot.</Pill>
+                  <Pill>Meetups</Pill>
+                  <Pill>Open roster</Pill>
+                  <Pill>Directory</Pill>
+                  <Pill>Tools</Pill>
+                  <Pill>Learn. Collaborate. Scale.</Pill>
                 </div>
 
                 <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
-                  Fort Worth is entering a real production era.
+                  A growing industry needs a stronger local pipeline.
                 </h1>
 
                 <p className="mt-5 max-w-2xl text-pretty text-base text-white/70 sm:text-lg">
-                  DFW has decades of film history, but the current moment is
-                  different: major studio infrastructure is landing here,
-                  incentives are stronger, and the limiting factor becomes
-                  people. Crew depth, trust, and discoverable talent are what
-                  turn stages into a real industry.
+                  As production expands in North Texas, the next challenge is
+                  depth: trained crews, discoverable talent, and independent
+                  projects that can grow into financeable, distributable films.
+                  FWF focuses on building that pipeline through community,
+                  collaboration, and consistency.
                 </p>
 
                 <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                   <Link
                     href={LINKS.instagram}
                     target="_blank"
+                    rel="noreferrer"
                     className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black hover:opacity-90"
                   >
                     <InstagramIcon className="h-4 w-4" />
@@ -123,6 +210,7 @@ export default function AboutPage() {
                   <Link
                     href={LINKS.discord}
                     target="_blank"
+                    rel="noreferrer"
                     className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white hover:bg-white/10"
                   >
                     <DiscordIcon className="h-4 w-4" />
@@ -139,277 +227,358 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Content */}
+        {/* Story flow */}
         <section>
-          <div className="mx-auto max-w-6xl px-5 pb-16 pt-12 sm:px-6">
-            <div className="grid gap-6 lg:grid-cols-12">
-              {/* Left column */}
-              <div className="lg:col-span-7">
-                {/* The moment */}
-                <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-                  <SectionTitle
-                    eyebrow="The moment"
-                    title="Infrastructure is growing fast; the workforce must grow with it."
-                    subtitle="New stages do not matter without trained crews, dependable department leads, and a visible roster productions can staff quickly."
-                  />
+          <div className="mx-auto max-w-5xl px-5 pb-16 pt-10 sm:px-6">
+            {/* Chapter 1 */}
+            <Card
+              eyebrow="Chapter 1: The moment"
+              title="Fort Worth and North Texas are entering a real production era."
+            >
+              <p className="text-sm text-white/70">
+                The region is seeing new infrastructure, more projects, and more
+                attention. That momentum is a good thing. When major players
+                build here, it brings work, training opportunities, and proof
+                that Texas can support scale.
+              </p>
 
-                  <p className="mt-4 text-white/70">
-                    North Texas is seeing unprecedented investment: large-scale
-                    studio development, city-backed production zones, and
-                    workforce initiatives designed to keep crews local instead
-                    of importing entire departments from out of state.
-                  </p>
+              <p className="mt-4 text-sm text-white/70">
+                The next step is making sure the growth is durable: deep local
+                crews, discoverable talent, and an indie pipeline that can
+                develop new filmmakers into professionals who can deliver on
+                larger projects.
+              </p>
 
-                  <p className="mt-4 text-white/70">
-                    Taylor Sheridan’s SGS Studios presence, and the broader
-                    AllianceTexas build-out, signals something important: DFW is
-                    not only a backdrop, it is becoming a base. On the south
-                    side, Mansfield’s planned studio campus adds more long-term
-                    capacity. When capacity increases, demand for local crew and
-                    talent visibility increases immediately.
-                  </p>
-
-                  <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                    <Stat
-                      label="State incentive plan"
-                      value="$1.5B"
-                      note="Approved over 10 years; designed to attract and retain productions."
-                    />
-                    <Stat
-                      label="Fort Worth Film Commission"
-                      value="1,000+"
-                      note="Projects supported since 2015."
-                    />
-                    <Stat
-                      label="Local impact"
-                      value="$700M+"
-                      note="Economic impact and 30,000+ jobs supported in Fort Worth."
-                    />
-                  </div>
-
-                  <div className="mt-6 rounded-2xl border border-white/10 bg-black/30 p-4">
-                    <div className="text-xs text-white/60">
-                      Why this matters
-                    </div>
-                    <div className="mt-2 text-sm text-white/80">
-                      If DFW wants sustainable production, it needs density:
-                      crew, vendors, training, and community that keeps talent
-                      here long enough to build real careers.
-                    </div>
-                  </div>
-                </div>
-
-                {/* History and context */}
-                <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-6">
-                  <SectionTitle
-                    eyebrow="Context"
-                    title="DFW has the legacy; now it is rebuilding scale."
-                    subtitle="From classic features to iconic TV, the region has been on screen for generations."
-                  />
-
-                  <p className="mt-4 text-white/70">
-                    The metroplex has served as a filming home for over a
-                    century. Long-running television and recognizable locations
-                    shaped how audiences see North Texas. Now, the industry is
-                    moving from occasional projects to sustained production
-                    cycles, including series work, commercials, digital content,
-                    and post-production.
-                  </p>
-
-                  <p className="mt-4 text-white/70">
-                    This matters for independents: when commercial and studio
-                    production grows locally, it creates more day-rate work,
-                    more mentorship, and more crew pathways. A stronger base
-                    means more people can stay in DFW while building serious
-                    portfolios.
-                  </p>
-                </div>
-
-                {/* Ecosystem map */}
-                <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-6">
-                  <SectionTitle
-                    eyebrow="The ecosystem"
-                    title="DFW already has major pieces"
-                    subtitle="Commissions, unions, festivals, schools, and professional groups are active. FWF complements them by focusing on consistent collaboration and talent discovery in Fort Worth."
-                  />
-
-                  <div className="mt-5 grid gap-3">
-                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                      <div className="text-sm font-semibold">
-                        Film commissions
-                      </div>
-                      <p className="mt-2 text-sm text-white/75">
-                        Dallas and Fort Worth support productions through
-                        official film offices, permitting guidance, and location
-                        support. Fort Worth has rapidly grown since establishing
-                        its film commission in 2015.
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                      <div className="text-sm font-semibold">
-                        Industry organizations
-                      </div>
-                      <p className="mt-2 text-sm text-white/75">
-                        DFW has serious community infrastructure: Dallas
-                        Producers Association, Texas Media Production Alliance,
-                        Women in Film Dallas, Dallas Screenwriters Association,
-                        and multiple filmmaker communities such as Dallas
-                        Filmmakers Alliance. These groups support advocacy,
-                        education, and networking across the metroplex.
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                      <div className="text-sm font-semibold">
-                        Festivals and culture
-                      </div>
-                      <p className="mt-2 text-sm text-white/75">
-                        Festivals are a big part of the talent pipeline: Dallas
-                        International Film Festival, Lone Star Film Festival in
-                        Fort Worth, plus strong specialty festivals and showcase
-                        events across Dallas, Denton, Arlington, and beyond.
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                      <div className="text-sm font-semibold">
-                        Education and workforce
-                      </div>
-                      <p className="mt-2 text-sm text-white/75">
-                        DFW is rich with film programs and hands-on training:
-                        university programs, community colleges, and specialized
-                        schools. Workforce initiatives tied to new studio growth
-                        are accelerating below-the-line training because that is
-                        where the demand spikes first.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                <Stat
+                  label="State incentive plan"
+                  value="$1.5B"
+                  note="Approved over 10 years; designed to attract and retain productions."
+                />
+                <Stat
+                  label="Fort Worth Film Commission"
+                  value="1,000+"
+                  note="Projects supported since 2015."
+                />
+                <Stat
+                  label="Local impact"
+                  value="$700M+"
+                  note="Economic impact and 30,000+ jobs supported in Fort Worth."
+                />
               </div>
 
-              {/* Right column */}
-              <div className="lg:col-span-5">
-                {/* FWF story */}
-                <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-                  <SectionTitle
-                    eyebrow="FWF"
-                    title="We are building the Fort Worth layer."
-                    subtitle="Not hype. Not gatekeeping. Consistent meetups, real crew matching, and a talent directory people can actually use."
-                  />
-
-                  <div className="mt-5 grid gap-3">
-                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                      <div className="text-xs text-white/60">What we do</div>
-                      <div className="mt-2 text-sm text-white/80">
-                        We host meetups that make it easy to meet collaborators,
-                        build trust, and turn conversations into shoots.
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                      <div className="text-xs text-white/60">Why we exist</div>
-                      <div className="mt-2 text-sm text-white/80">
-                        As DFW grows, producers need reliable local crews and a
-                        visible roster. Independents need access to
-                        collaborators. FWF sits in the middle: connecting the
-                        local indie scene to a more professional production
-                        ecosystem.
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                      <div className="text-xs text-white/60">
-                        Talent spotlight
-                      </div>
-                      <div className="mt-2 text-sm text-white/80">
-                        Our Members page is built like a roster: photo, bio,
-                        specialty, and links. It is designed to grow
-                        indefinitely so local talent stays discoverable.
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 flex gap-3">
-                    <Link
-                      href={LINKS.instagram}
-                      target="_blank"
-                      className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl border border-white/12 bg-white/5 px-4 py-3 text-center text-sm font-semibold hover:bg-white/10"
-                    >
-                      <InstagramIcon className="h-4 w-4" />
-                      <span className="hidden sm:inline">Instagram</span>
-                    </Link>
-
-                    <Link
-                      href={LINKS.discord}
-                      target="_blank"
-                      className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl border border-white/12 bg-white/5 px-4 py-3 text-center text-sm font-semibold hover:bg-white/10"
-                    >
-                      <DiscordIcon className="h-4 w-4" />
-                      <span className="hidden sm:inline">Discord</span>
-                    </Link>
-                  </div>
-                </div>
-
-                {/* What success looks like */}
-                <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-6">
-                  <SectionTitle
-                    eyebrow="What success looks like"
-                    title="More work stays local; more people build careers here."
-                    subtitle="DFW wins when productions can staff confidently, and when independents can find collaborators without leaving Texas."
-                  />
-
-                  <div className="mt-5 grid gap-3">
-                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                      <div className="text-xs text-white/60">Crew depth</div>
-                      <div className="mt-2 text-sm text-white/80">
-                        More trained grips, electrics, camera, art, sound, HMU,
-                        and production staff available locally.
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                      <div className="text-xs text-white/60">
-                        Talent retention
-                      </div>
-                      <div className="mt-2 text-sm text-white/80">
-                        More filmmakers and crew can stay in DFW, build reels,
-                        and stack credits without relocating to the coasts.
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                      <div className="text-xs text-white/60">Visibility</div>
-                      <div className="mt-2 text-sm text-white/80">
-                        Great local work gets screened, shared, staffed, and
-                        seen. Not promised, but made more likely through
-                        consistency and community.
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 rounded-2xl border border-white/10 bg-black/30 p-4">
-                    <div className="text-sm font-semibold">
-                      If you are local
-                    </div>
-                    <p className="mt-2 text-sm text-white/75">
-                      Join the Discord, introduce yourself, and drop your role.
-                      If you are a director, DP, editor, producer, actor, sound,
-                      composer, HMU, grip, electric, art, or anything in
-                      between, you belong here.
-                    </p>
-                  </div>
+              <div className="mt-6 rounded-2xl border border-white/10 bg-black/30 p-4">
+                <div className="text-xs text-white/60">The opportunity</div>
+                <div className="mt-2 text-sm text-white/80">
+                  This is a rare window: more productions are looking at Texas,
+                  and more Texans are considering film as a real path. A strong
+                  community turns that moment into careers.
                 </div>
               </div>
-            </div>
+            </Card>
 
-            {/* keep spacing above footer */}
+            <Divider />
+
+            {/* Chapter 2 */}
+            <Card
+              eyebrow="Chapter 2: The gap"
+              title="Growth alone does not guarantee local opportunity."
+            >
+              <p className="text-sm text-white/70">
+                Even in a boom, it is common for specialized roles and entire
+                departments to be staffed from out of state. It is also common
+                for funding to cluster around the most visible, proven entities.
+                That is not villainy. It is how risk works in film.
+              </p>
+
+              <p className="mt-4 text-sm text-white/70">
+                Our goal is to widen the funnel in a constructive way: make
+                Texas talent easier to find, easier to trust, and easier to
+                hire; help new filmmakers get their footing; and help the
+                strongest indie projects become financeable and distributable.
+              </p>
+
+              <div className="mt-6 grid gap-3 lg:grid-cols-2">
+                <Bullet
+                  title="Local crews need visibility"
+                  body={
+                    <>
+                      Great crew work exists here, but it can be fragmented and
+                      hard to discover. We help make local talent legible: who
+                      does what, where to see their work, and how to contact
+                      them.
+                    </>
+                  }
+                />
+                <Bullet
+                  title="Indie projects need a pathway"
+                  body={
+                    <>
+                      It is not enough to make something, you also need a plan:
+                      packaging, budgets, pitch clarity, and the right
+                      relationships. We help people learn the steps and meet the
+                      right collaborators.
+                    </>
+                  }
+                />
+              </div>
+            </Card>
+
+            <Divider />
+
+            {/* Chapter 3 */}
+            <Card
+              eyebrow="Chapter 3: Who we are"
+              title="FWF is a connector: not a production company, not a closed club."
+            >
+              <p className="text-sm text-white/70">
+                Fort Worth Filmmakers exists to connect people and compound
+                momentum. We do not produce projects as an organization. We
+                support creators at every level, then help the most promising
+                work rise through consistency, community, and craft.
+              </p>
+
+              <div className="mt-6 rounded-2xl border border-white/10 bg-black/30 p-4">
+                <div className="text-xs text-white/60">What we believe</div>
+                <div className="mt-2 text-sm text-white/80">
+                  Low and no budget filmmaking matters because it creates
+                  filmmakers. Meetups matter because trust staffs sets.
+                  Screenings matter because audiences prove demand. Funding
+                  matters because paid work keeps talent here.
+                </div>
+              </div>
+            </Card>
+
+            <Divider />
+
+            {/* Chapter 4 */}
+            <Card
+              eyebrow="Chapter 4: What we do"
+              title="A simple system that compounds every month."
+            >
+              <div className="grid gap-3">
+                <Bullet
+                  title="Meetups that turn into crews"
+                  body={
+                    <>
+                      We host meetups designed to convert conversation into
+                      collaboration. You meet people by role, find your next
+                      crew, and build relationships that make set life smoother.
+                    </>
+                  }
+                />
+
+                <Bullet
+                  title="A roster producers can actually use"
+                  body={
+                    <>
+                      Our roster is built like a directory: photo, role,
+                      specialty, and links. It is free to get listed on. The
+                      goal is discoverable talent that is easy to contact, easy
+                      to vet, and easy to staff.
+                    </>
+                  }
+                />
+
+                <Bullet
+                  title="A directory built for collaboration"
+                  body={
+                    <>
+                      We maintain a directory of organizations, contests,
+                      programs, and communities across the region, with clear
+                      ways to contact them. Our goal is to collaborate with the
+                      ecosystem, not fragment it.
+                    </>
+                  }
+                />
+
+                <Bullet
+                  title="Tools that remove friction"
+                  body={
+                    <>
+                      We build practical tools for filmmakers and producers. The
+                      first is a non-union rate calculator, and we are happy to
+                      create new tools as the community suggests them.
+                    </>
+                  }
+                />
+
+                <Bullet
+                  title="Support for the indie pipeline"
+                  body={
+                    <>
+                      We encourage beginners and weekend filmmakers to make
+                      films with their friends and screen them. That layer is
+                      essential. It grows taste, skills, and discipline, and it
+                      helps serious talent rise naturally.
+                    </>
+                  }
+                />
+
+                <Bullet
+                  title="Education toward funding and distribution"
+                  body={
+                    <>
+                      When a project is ready to scale, we help creators
+                      understand what “financeable” looks like: packaging,
+                      budgets, pitch materials, and the relationships that move
+                      a project toward theatrical and streaming opportunities.
+                    </>
+                  }
+                />
+              </div>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <LinkCard
+                  href={LINKS.roster}
+                  label="Roster"
+                  caption="Free listing: crew, talent, and creatives"
+                />
+                <LinkCard
+                  href={LINKS.directory}
+                  label="Directory"
+                  caption="Organizations, contests, programs, plus contact info"
+                />
+                <LinkCard
+                  href={LINKS.tools}
+                  label="Tools"
+                  caption="Resources built with the community"
+                />
+                <LinkCard
+                  href={LINKS.nonUnionCalc}
+                  label="Non-Union Rate Calculator"
+                  caption="Our first tool, with more to come"
+                />
+              </div>
+            </Card>
+
+            <Divider />
+
+            {/* Chapter 5 */}
+            <Card
+              eyebrow="Chapter 5: Who this is for"
+              title="If you want to work in film in Texas, you belong here."
+            >
+              <div className="mt-2 grid gap-3 lg:grid-cols-2">
+                <Bullet
+                  title="New to film"
+                  body={
+                    <>
+                      Come learn the landscape: departments, set etiquette,
+                      where opportunities live, and how to start helping on real
+                      projects. The fastest way in is proximity to working
+                      people.
+                    </>
+                  }
+                />
+                <Bullet
+                  title="Indie filmmakers"
+                  body={
+                    <>
+                      Find collaborators, build repeat teams, improve your work
+                      through feedback and screenings, and learn how to package
+                      projects that can grow beyond “no budget.”
+                    </>
+                  }
+                />
+                <Bullet
+                  title="Crew and working pros"
+                  body={
+                    <>
+                      Get discoverable, meet producers and department leads, and
+                      help strengthen local hiring by showing what Texas crews
+                      can do.
+                    </>
+                  }
+                />
+                <Bullet
+                  title="Audience and supporters"
+                  body={
+                    <>
+                      Show up to screenings and bring friends. If we want
+                      powerful indie films on big screens, we need rooms that
+                      feel alive.
+                    </>
+                  }
+                />
+              </div>
+            </Card>
+
+            <Divider />
+
+            {/* Chapter 6 */}
+            <Card
+              eyebrow="Chapter 6: What success looks like"
+              title="More paid work here; more great films from here."
+            >
+              <div className="grid gap-3 lg:grid-cols-3">
+                <Bullet
+                  title="More local hiring"
+                  body={
+                    <>
+                      More productions staff Texas crew because the talent is
+                      visible, proven, and connected.
+                    </>
+                  }
+                />
+                <Bullet
+                  title="Better projects"
+                  body={
+                    <>
+                      The indie layer stays active, and the best work
+                      consistently rises to larger budgets and larger audiences.
+                    </>
+                  }
+                />
+                <Bullet
+                  title="Packed screenings"
+                  body={
+                    <>
+                      Local audiences show up for independent films, which
+                      creates momentum for broader distribution.
+                    </>
+                  }
+                />
+              </div>
+
+              <div className="mt-6 rounded-2xl border border-white/10 bg-black/30 p-4">
+                <div className="text-sm font-semibold">
+                  If you take one step
+                </div>
+                <p className="mt-2 text-sm text-white/75">
+                  Join the Discord, introduce yourself, post your role, then
+                  come to a meetup. This is a storytelling profession; community
+                  is how the story gets made.
+                </p>
+              </div>
+
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href={LINKS.discord}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black hover:opacity-90"
+                >
+                  <DiscordIcon className="h-4 w-4" />
+                  Join the Discord
+                </Link>
+                <Link
+                  href={LINKS.instagram}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white hover:bg-white/10"
+                >
+                  <InstagramIcon className="h-4 w-4" />
+                  Follow on Instagram
+                </Link>
+              </div>
+            </Card>
+
             <div className="h-10" />
           </div>
         </section>
       </main>
 
-      {/* Footer sits at the bottom of the flex column */}
       <Footer instagramUrl={LINKS.instagram} discordUrl={LINKS.discord} />
     </div>
   );

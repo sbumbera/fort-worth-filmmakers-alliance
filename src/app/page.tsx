@@ -42,11 +42,29 @@ export default function HomePage() {
       <Header activeHref="/" />
 
       {/* Main content grows to fill space */}
-      <main className="relative z-10 flex-1">
+      <main className="relative z-10 flex-1 overflow-x-hidden">
         <section>
           <div className="mx-auto grid max-w-6xl gap-10 px-5 pb-14 pt-14 sm:px-6 sm:pt-14 lg:grid-cols-12 lg:items-center">
             <div className="lg:col-span-7">
-              <div className="mb-5 flex flex-wrap gap-x-3 gap-y-2">
+              {/* MOBILE: metadata line (no leading separator on wrapped lines) */}
+              <div className="mb-5 sm:hidden flex flex-wrap items-center text-[11px] leading-snug text-white/55">
+                {[
+                  "Fort Worth",
+                  "Indie-first",
+                  "Talent spotlight",
+                  "Meet. Crew. Shoot.",
+                ].map((t) => (
+                  <span
+                    key={t}
+                    className="after:mx-2 after:text-white/25 after:content-['•'] last:after:content-['']"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+
+              {/* DESKTOP+: pills */}
+              <div className="mb-5 hidden sm:flex flex-wrap gap-x-3 gap-y-2">
                 <Pill>Fort Worth</Pill>
                 <Pill>Indie-first</Pill>
                 <Pill>Talent spotlight</Pill>
@@ -54,12 +72,16 @@ export default function HomePage() {
               </div>
 
               <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-                A home for indie filmmakers in Fort Worth.
+                A stronger Texas indie scene: funded projects, paid work, and
+                packed theaters.
               </h1>
 
               <p className="mt-5 max-w-2xl text-pretty text-base text-white/70 sm:text-lg">
-                We grow local projects, connect crews, and highlight talent;
-                working to help strong work reach wider audiences.
+                Fort Worth Filmmakers (FWF) is a grassroots hub for people who
+                want to make movies in Texas. We welcome first-timers, working
+                crew, and seasoned filmmakers. Our mission is simple: grow the
+                community, raise the quality, and help the best work reach real
+                audiences.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -79,13 +101,6 @@ export default function HomePage() {
                 >
                   <DiscordIcon className="h-4 w-4" />
                   Join the Discord
-                </Link>
-
-                <Link
-                  href="/members"
-                  className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-transparent px-5 py-3 text-sm font-semibold text-white hover:bg-white/10"
-                >
-                  Browse Members
                 </Link>
               </div>
             </div>
