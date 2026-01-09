@@ -32,7 +32,7 @@ export default function Header({
   activeHref,
   orgName = "Fort Worth Filmmakers",
   tagline = "Nonprofit community",
-  logoSrc = "/brand/logo.png",
+  logoSrc = "/brand/emblem.png",
   navItems = DEFAULT_NAV,
   ctaHref = "https://discord.gg/aJrsuTHg5Z",
   ctaLabel = "Join",
@@ -45,12 +45,12 @@ export default function Header({
         <div className="relative flex items-center justify-between gap-4">
           {/* Left: Logo */}
           <Link href="/" className="flex min-w-0 items-center gap-3">
-            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-white/10 ring-1 ring-white/10">
+            <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-white/10 ring-1 ring-white/10">
               <Image
                 src={logoSrc}
                 alt={`${orgName} logo`}
                 fill
-                className="object-contain p-1.5"
+                className="object-contain"
                 priority
               />
             </div>
