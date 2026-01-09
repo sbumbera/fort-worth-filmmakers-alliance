@@ -12,7 +12,14 @@ const LINKS = {
 
 function Pill({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/75">
+    <span
+      className="
+        inline-flex items-center
+        text-xs font-medium
+        text-white/60
+        sm:rounded-full sm:border sm:border-white/10 sm:bg-white/5 sm:px-3 sm:py-1 sm:text-white/75
+      "
+    >
       {children}
     </span>
   );
@@ -37,9 +44,9 @@ export default function HomePage() {
       {/* Main content grows to fill space */}
       <main className="relative z-10 flex-1">
         <section>
-          <div className="mx-auto grid max-w-6xl gap-10 px-5 pb-14 pt-10 sm:px-6 sm:pt-14 lg:grid-cols-12 lg:items-center">
+          <div className="mx-auto grid max-w-6xl gap-10 px-5 pb-14 pt-14 sm:px-6 sm:pt-14 lg:grid-cols-12 lg:items-center">
             <div className="lg:col-span-7">
-              <div className="mb-5 flex flex-wrap gap-2">
+              <div className="mb-5 flex flex-wrap gap-x-3 gap-y-2">
                 <Pill>Fort Worth</Pill>
                 <Pill>Indie-first</Pill>
                 <Pill>Talent spotlight</Pill>

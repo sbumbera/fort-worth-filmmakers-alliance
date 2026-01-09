@@ -10,7 +10,8 @@ export type LinkKind =
   | "linkedin"
   | "imdb"
   | "email"
-  | "backstage";
+  | "backstage"
+  | "actorbay";
 
 export type MemberLink = {
   kind: LinkKind;
@@ -36,7 +37,7 @@ export const MEMBERS: Member[] = [
     name: "Steven 'Jesse Lee' Bumbera",
     location: "Fort Worth",
     roles: ["Actor", "Writer", "Production Assistant (PA)"],
-    bio: "Marine veteran and entrepreneur with a strong foundation in discipline, leadership, and execution. Actor and writer with extensive experience in short-form narrative projects, currently building toward producing through hands-on work as a production assistant.",
+    bio: "Marine veteran, software engineer and entrepreneur with a strong foundation in discipline, leadership, and execution. Actor and writer with extensive experience in short-form narrative projects, currently building toward producing through hands-on work as a production assistant.",
     image: {
       src: "/members/s-bumbera.jpeg",
       alt: "Steven Bumbera",
@@ -67,7 +68,6 @@ export const MEMBERS: Member[] = [
         label: "IMDB",
       },
     ],
-    keywords: ["FWFA", "Actor", "Writer", "Production Assistant", "PA"],
   },
   {
     name: "Paul Curry",
@@ -85,7 +85,6 @@ export const MEMBERS: Member[] = [
         label: "Instagram",
       },
     ],
-    keywords: ["Actor"],
   },
   {
     name: "Marianna Repetto",
@@ -108,7 +107,6 @@ export const MEMBERS: Member[] = [
         label: "IMDB",
       },
     ],
-    keywords: ["Actress"],
   },
   {
     name: "Tyler Henize",
@@ -134,6 +132,49 @@ export const MEMBERS: Member[] = [
         kind: "backstage",
         href: "https://www.backstage.com/tal/tyler-henize",
         label: "Backstage",
+      },
+    ],
+  },
+  {
+    name: "Calvin Cooper Hall",
+    location: "Fort Worth",
+    roles: ["Actor"],
+    bio: "American actor working in film, television, and immersive theater. He has appeared in Paramount’s Landman (Season 1 and 2) and Taylor Sheridan–universe projects The Madison and Dutton Ranch (2026), along with independent films Daisy and Pickleball – The Movie. He earned his first featured background role in the short film Virgin Birth (K-LOVE Radio) and his first speaking role as Captain John Parker, co-lead of Independence Day Experience, produced by Capernaum Studios.",
+    image: {
+      src: "/members/c-hall2.jpeg",
+      alt: "Calvin Cooper Hall",
+    },
+    links: [
+      {
+        kind: "imdb",
+        href: "https://www.imdb.com/name/nm17438598/",
+        label: "IMDb",
+      },
+      {
+        kind: "actorbay",
+        href: "https://actorbay.io/profile/calvin-cooper-hall",
+      },
+    ],
+  },
+  {
+    name: "Jairo Gutierrez",
+    location: "Fort Worth",
+    roles: ["Writer", "Director", "Sound Mixer"],
+    bio: "Jairo Ramon Gutier, who also goes by 'J.R. Gutier' and 'The Masked Director', is just a man who loves films. He loves film so much that when his favorite genre was not being created  here in the states, he decided to bring his own version here. Jairo films his own brand of V-Cinema, when he is not writing and directing , you can find him helping out on many film projects as the Sound Mixer. Helping out people create their dreams, brings much joy to him, and he hopes to continue working in the film industry for as long as he lives.",
+    image: {
+      src: "/members/j-gutierrez.jpg",
+      alt: "Jairo Gutierrez",
+    },
+    links: [
+      {
+        kind: "youtube",
+        href: "https://youtube.com/@maskedguyproductions9501",
+        label: "YouTube",
+      },
+      {
+        kind: "instagram",
+        href: "https://www.instagram.com/j.r._gutier",
+        label: "Instagram",
       },
     ],
   },

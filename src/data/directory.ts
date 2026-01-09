@@ -1,17 +1,4 @@
-// src/data/resources.ts
-
-/**
- * FWFA RESOURCES DATA (MANUAL, VERIFIED LINKS ONLY)
- *
- * RULES:
- * - ZERO guessed links: only include verified URLs you provide.
- * - If you do not have the exact URL: omit that link.
- * - Each item must have at least 1 link (usually Website).
- *
- * HOW TO ADD:
- * - Add a NEW SECTION: scroll to "SECTIONS (ADD NEW SECTION HERE)".
- * - Add an ORG to a section: find the section, add a new item in its "items" list.
- */
+// src/data/directory.ts
 
 export type LinkKind =
   | "website"
@@ -24,32 +11,32 @@ export type LinkKind =
   | "linkedin"
   | "email";
 
-export type ResourceLink = {
+export type DirectoryLink = {
   kind: LinkKind;
-  href: string; // MUST be a verified URL (or mailto:)
-  label: string;
+  href: string;
+  label?: string;
 };
 
-export type ResourceItem = {
+export type DirectoryItem = {
   name: string;
+  description: string;
   location?: string;
-  description: string; // one sentence
-  links: ResourceLink[]; // must have at least 1; no guessed links
-  keywords?: string[]; // acronyms, alt names, etc. for search
+  keywords?: string[];
+  links: DirectoryLink[];
 };
 
-export type ResourceSection = {
+export type DirectorySection = {
   id: string;
   title: string;
   subtitle?: string;
-  items: ResourceItem[];
+  items: DirectoryItem[];
 };
 
 // ============================================================================
 // SECTIONS (ADD NEW SECTION HERE)
 // ============================================================================
 
-export const SECTIONS: ResourceSection[] = [
+export const SECTIONS: DirectorySection[] = [
   // ==========================================================================
   // GOVERNMENT (ADD ORGS HERE)
   // ==========================================================================

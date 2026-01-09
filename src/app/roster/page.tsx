@@ -1,489 +1,291 @@
-// src/app/members/page.tsx
+// src/app/roster/page.tsx
 "use client";
 
-import { useMemo, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import {
-  InstagramIcon,
-  DiscordIcon,
-  WebsiteIcon,
-  FacebookIcon,
-  YouTubeIcon,
-  TikTokIcon,
-  XIcon,
-  LinkedInIcon,
-  EmailIcon,
-  IMDbIcon,
-  BackstageIcon,
-} from "@/components/icons";
+import { MEMBERS } from "@/data/members";
+import { useFilteredMembers } from "@/lib/membersSearch";
 
-import {
-  MEMBERS,
-  type LinkKind,
-  type Member,
-  type MemberLink,
-} from "@/data/members";
+import GetListedCallout from "@/components/members/GetListedCallout";
+import MembersFilters from "@/components/members/MembersFilters";
+import MembersGrid from "@/components/members/MembersGrid";
+import LoadMoreButton from "@/components/members/LoadMoreButton";
+import EmptyState from "@/components/members/EmptyState";
 
-const FWFA_LINKS = {
-  instagram: "https://www.instagram.com/fortworthfilmmakers",
-  discord: "https://discord.gg/aJrsuTHg5Z",
+type RoleGroup = {
+  department: string;
+  roles: string[];
 };
-
-function cn(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
-
-function normalize(str: string) {
-  return str.trim().toLowerCase();
-}
-
-function escapeRegex(s: string) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
 
 /**
- * Roles policy:
- * - Acting is ONLY: Actor, Actress
- * - Searching "acting" should match Actor + Actress
- * - Searching "actor" matches Actor
- * - Searching "actress" matches Actress
+ * Roles grouped by department (A–Z) and roles inside each department (A–Z).
+ * Includes baseline/common roles so "normal" crew positions do not go missing.
  */
-const ROLE_ALIASES: Record<string, string[]> = {
-  // Acting (simplified)
-  actor: ["acting"],
-  actress: ["acting"],
+const ROLE_GROUPS: RoleGroup[] = [
+  { department: "Acting", roles: ["Actor", "Actress"] },
+  {
+    department: "Art Department",
+    roles: [
+      "Art Director",
+      "Construction Coordinator",
+      "Graphic Designer (Art Dept)",
+      "Production Designer",
+      "Prop Assistant",
+      "Props Master",
+      "Scenic Artist",
+      "Set Decorator",
+      "Set Dresser",
+    ],
+  },
+  {
+    department: "Camera Department",
+    roles: [
+      "1st Assistant Camera (1st AC)",
+      "2nd Assistant Camera (2nd AC)",
+      "Camera Operator",
+      "Cinematographer",
+      "DIT (Digital Imaging Technician)",
+      "Director of Photography (DP)",
+      "Drone Pilot",
+      "Steadicam Operator",
+      "Unit Stills Photographer",
+      "Video Assist",
+    ],
+  },
+  {
+    department: "Costume Department",
+    roles: [
+      "Costume Designer",
+      "Costumer",
+      "Set Costumer",
+      "Wardrobe Supervisor",
+    ],
+  },
+  {
+    department: "Directing",
+    roles: [
+      "1st Assistant Director (1st AD)",
+      "2nd 2nd Assistant Director (2nd 2nd AD)",
+      "2nd Assistant Director (2nd AD)",
+      "Director",
+      "Script Supervisor",
+      "Showrunner",
+    ],
+  },
+  {
+    department: "Editorial",
+    roles: ["Assistant Editor", "Colorist", "Editor"],
+  },
+  {
+    department: "Electric",
+    roles: [
+      "Best Boy Electric",
+      "Electrician",
+      "Gaffer",
+      "Lighting Technician",
+    ],
+  },
+  {
+    department: "Grip",
+    roles: ["Best Boy Grip", "Dolly Grip", "Grip", "Key Grip"],
+  },
+  {
+    department: "Hair and Makeup",
+    roles: [
+      "Hair Stylist",
+      "Key Hair Stylist",
+      "Key Makeup Artist",
+      "Makeup Artist",
+      "SFX Makeup Artist",
+    ],
+  },
+  {
+    department: "Locations",
+    roles: ["Assistant Location Manager", "Location Manager", "Location Scout"],
+  },
+  { department: "Music", roles: ["Composer"] },
+  { department: "Post Sound", roles: ["Re-Recording Mixer", "Sound Designer"] },
+  {
+    department: "Production",
+    roles: [
+      "Associate Producer",
+      "Co-Producer",
+      "Craft Service",
+      "Executive Producer",
+      "Line Producer",
+      "Producer",
+      "Production Accountant",
+      "Production Assistant (PA)",
+      "Production Coordinator",
+      "Production Secretary",
+      "Safety Officer",
+      "Unit Production Manager (UPM)",
+    ],
+  },
+  {
+    department: "Sound Department",
+    roles: ["Boom Operator", "Sound Mixer", "Sound Utility"],
+  },
+  {
+    department: "Transportation",
+    roles: ["Driver", "Picture Car Coordinator", "Transportation Coordinator"],
+  },
+  {
+    department: "Visual Effects",
+    roles: ["Motion Graphics Designer", "VFX Artist", "VFX Supervisor"],
+  },
+  { department: "Writing", roles: ["Screenwriter", "Writer"] },
+];
 
-  // Production
-  "production assistant (pa)": ["pa", "production assistant"],
-  "unit production manager (upm)": ["upm", "unit production manager"],
-  "production coordinator": ["prod coordinator", "production coord"],
-  "production secretary": ["prod secretary"],
+/**
+ * Synonyms/normalization to dedupe (ex: DP vs Director of Photography).
+ * Also maps common variants back to a single canonical label.
+ */
+const ROLE_SYNONYMS: Array<{ canonical: string; synonyms: string[] }> = [
+  {
+    canonical: "Director of Photography (DP)",
+    synonyms: ["DP", "DOP", "DoP", "Director of Photography"],
+  },
+  {
+    canonical: "Sound Mixer",
+    synonyms: [
+      "Production Sound Mixer",
+      "Production Mixer",
+      "Mixer",
+      "Sound Recordist",
+    ],
+  },
+  {
+    canonical: "Unit Stills Photographer",
+    synonyms: ["Photographer", "Stills Photographer", "Unit Photographer"],
+  },
+];
 
-  // Directing
-  director: ["directing"],
-  "1st assistant director (1st ad)": ["1st ad", "first ad", "ad"],
-  "2nd assistant director (2nd ad)": ["2nd ad", "second ad", "ad"],
-  "2nd 2nd assistant director (2nd 2nd ad)": ["2nd 2nd ad", "ad"],
-
-  // Writing
-  writer: ["writing"],
-  screenwriter: ["screenwriting"],
-
-  // Camera
-  "director of photography (dp)": ["dp", "dop", "director of photography"],
-  cinematographer: ["cinematography", "cinema"],
-  "camera operator": ["cam op", "camera op"],
-  "steadicam operator": ["steadicam"],
-  "1st assistant camera (1st ac)": ["1st ac", "first ac", "ac"],
-  "2nd assistant camera (2nd ac)": ["2nd ac", "second ac", "ac"],
-  "dit (digital imaging technician)": ["dit", "digital imaging technician"],
-  "video assist": ["vtr", "video playback"],
-  "drone pilot": ["drone"],
-
-  // Electric / Grip
-  gaffer: ["gaff"],
-  "best boy electric": ["best boy", "b.b. electric"],
-  electrician: ["spark"],
-  "lighting technician": ["lighting tech", "lamp op"],
-  "key grip": ["keygrip"],
-  "best boy grip": ["best boy", "b.b. grip"],
-  grip: ["grips"],
-  "dolly grip": ["dolly"],
-
-  // Sound
-  "production sound mixer": ["sound mixer", "mixer"],
-  "boom operator": ["boom"],
-  "sound utility": ["utility", "sound util"],
-
-  // Art Department
-  "production designer": ["prod designer"],
-  "art director": ["art dir"],
-  "set decorator": ["set dec"],
-  "props master": ["prop master"],
-  "prop assistant": ["props assistant", "prop asst"],
-  "set dresser": ["dresser"],
-  "construction coordinator": ["construction coord"],
-  "scenic artist": ["scenic"],
-  "graphic designer (art dept)": ["graphic designer"],
-
-  // Wardrobe
-  "costume designer": ["costume"],
-  "wardrobe supervisor": ["wardrobe sup"],
-  costumer: ["costumes"],
-  "set costumer": ["set wardrobe"],
-
-  // HMU
-  "key makeup artist": ["key mua", "makeup"],
-  "makeup artist": ["mua", "makeup"],
-  "key hair stylist": ["key hair"],
-  "hair stylist": ["hair"],
-  "sfx makeup artist": ["sfx makeup", "special effects makeup"],
-
-  // Locations
-  "location manager": ["locations", "loc manager"],
-  "assistant location manager": ["asst location manager", "loc asst"],
-  "location scout": ["scout"],
-
-  // Transportation
-  "transportation coordinator": ["transportation", "transpo"],
-  driver: ["drivers"],
-  "picture car coordinator": ["picture cars", "car coordinator"],
-
-  // Services
-  "craft service": ["crafty"],
-  catering: ["caterer"],
-
-  // Post
-  editor: ["editing"],
-  "assistant editor": ["ae"],
-  colorist: ["color"],
-  "sound designer": ["sound design"],
-  "re-recording mixer": ["re recording mixer", "re-recording"],
-  composer: ["music"],
-  "vfx supervisor": ["vfx sup"],
-  "vfx artist": ["vfx"],
-  "motion graphics designer": ["motion graphics", "mograph"],
-
-  // Other
-  "script supervisor": ["script sup"],
-  photographer: ["photo"],
-  "unit stills photographer": ["stills", "unit stills"],
-  "production accountant": ["accountant"],
-  "safety officer": ["safety"],
-};
-
-function canonicalizeRoleForSearch(role: string) {
-  const r = normalize(role);
-  if (r.includes("actress")) return "actress";
-  if (r.includes("actor")) return "actor";
-  return r;
-}
-
-function roleTokens(roles: string[]) {
-  const tokens: string[] = [];
-
-  for (const role of roles) {
-    const canonical = canonicalizeRoleForSearch(role);
-    tokens.push(canonical);
-
-    const aliases = ROLE_ALIASES[canonical];
-    if (aliases?.length) tokens.push(...aliases.map(normalize));
-
-    const match = role.match(/\(([^)]+)\)/);
-    if (match?.[1]) {
-      const inside = match[1].trim();
-      if (inside.length <= 8) tokens.push(normalize(inside));
+function normalizeRoleLabel(label: string) {
+  const trimmed = label.trim();
+  for (const entry of ROLE_SYNONYMS) {
+    const canon = entry.canonical.toLowerCase();
+    const val = trimmed.toLowerCase();
+    if (val === canon) return entry.canonical;
+    for (const s of entry.synonyms) {
+      if (val === s.toLowerCase()) return entry.canonical;
     }
   }
-
-  return Array.from(new Set(tokens));
+  return trimmed;
 }
 
-function matchesQuery(haystack: string, q: string) {
-  const query = normalize(q);
-  if (!query) return true;
-
-  if (query.length <= 2) {
-    const re = new RegExp(`\\b${escapeRegex(query)}\\b`, "i");
-    return re.test(haystack);
+function uniqSorted(items: string[]) {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const item of items) {
+    const normalized = normalizeRoleLabel(item);
+    if (!seen.has(normalized)) {
+      seen.add(normalized);
+      out.push(normalized);
+    }
   }
-
-  const re = new RegExp(`\\b${escapeRegex(query)}`, "i");
-  return re.test(haystack);
+  return out.sort((a, b) => a.localeCompare(b));
 }
 
-function getKindLabel(kind: LinkKind) {
-  switch (kind) {
-    case "website":
-      return "Website";
-    case "instagram":
-      return "Instagram";
-    case "discord":
-      return "Discord";
-    case "facebook":
-      return "Facebook";
-    case "youtube":
-      return "YouTube";
-    case "tiktok":
-      return "TikTok";
-    case "x":
-      return "X";
-    case "linkedin":
-      return "LinkedIn";
-    case "email":
-      return "Email";
-    case "imdb":
-      return "IMDb";
-    case "backstage":
-      return "Backstage";
-    default:
-      return "Link";
+const SORTED_GROUPS = ROLE_GROUPS.map((g) => ({
+  department: g.department,
+  roles: uniqSorted(g.roles),
+})).sort((a, b) => a.department.localeCompare(b.department));
+
+const DEPT_TO_ROLES = new Map<string, string[]>(
+  SORTED_GROUPS.map((g) => [g.department, g.roles])
+);
+
+/**
+ * Instead of fake "____________" divider rows (ugly, ambiguous),
+ * we use a structured dropdown with <optgroup> so departments are obvious and bolded by the browser UI.
+ *
+ * roleOptions is now a structured object, but MembersFilters already expects string[].
+ * So we pass a single encoded string[] that MembersFilters will convert into grouped <option>s.
+ *
+ * Format:
+ *   - "All roles"
+ *   - "__DEPT__|{Department}" (rendered as optgroup label, not selectable)
+ *   - "dept:{Department}" (selectable: All {Department})
+ *   - "{Role}" (selectable)
+ */
+const ROLE_OPTIONS: string[] = (() => {
+  const options: string[] = ["All roles"];
+  for (const g of SORTED_GROUPS) {
+    options.push(`__DEPT__|${g.department}`);
+    options.push(`dept:${g.department}`);
+    for (const r of g.roles) options.push(r);
   }
-}
+  return options;
+})();
 
-function ExternalLinkButton({ link }: { link: MemberLink }) {
-  const kind = link.kind;
-  const label = link.label?.trim() ? link.label : getKindLabel(kind);
-  const isEmail = kind === "email";
-  const isExternal = !isEmail;
-
-  const icon =
-    kind === "instagram" ? (
-      <InstagramIcon className="h-4 w-4" />
-    ) : kind === "discord" ? (
-      <DiscordIcon className="h-4 w-4" />
-    ) : kind === "website" ? (
-      <WebsiteIcon className="h-4 w-4" />
-    ) : kind === "facebook" ? (
-      <FacebookIcon className="h-4 w-4" />
-    ) : kind === "youtube" ? (
-      <YouTubeIcon className="h-4 w-4" />
-    ) : kind === "tiktok" ? (
-      <TikTokIcon className="h-4 w-4" />
-    ) : kind === "x" ? (
-      <XIcon className="h-4 w-4" />
-    ) : kind === "linkedin" ? (
-      <LinkedInIcon className="h-4 w-4" />
-    ) : kind === "imdb" ? (
-      <IMDbIcon className="h-4 w-7" />
-    ) : kind === "backstage" ? (
-      <BackstageIcon className="h-4 w-4" />
-    ) : (
-      <EmailIcon className="h-4 w-4" />
-    );
-
-  return (
-    <Link
-      href={link.href}
-      target={isExternal ? "_blank" : undefined}
-      rel={isExternal ? "noopener noreferrer" : undefined}
-      className={cn(
-        "inline-flex min-w-0 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/85 hover:bg-white/10 hover:text-white"
-      )}
-    >
-      <span className="shrink-0">{icon}</span>
-      <span className="min-w-0 truncate">{label}</span>
-    </Link>
-  );
-}
-
-function MemberCard({ member }: { member: Member }) {
-  const website = member.links.find((l) => l.kind === "website");
-  const socials = member.links.filter((l) => l.kind !== "website");
-
-  return (
-    <div className="flex min-h-[260px] min-w-0 flex-col rounded-3xl border border-white/10 bg-black/25 p-5">
-      <div className="flex min-w-0 items-start justify-between gap-4">
-        <div className="flex min-w-0 items-start gap-4">
-          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-white/10 bg-white/5">
-            <Image
-              src={member.image.src}
-              alt={member.image.alt}
-              fill
-              sizes="64px"
-              className="object-cover"
-              style={{ objectPosition: "50% 20%" }}
-            />
-          </div>
-
-          <div className="min-w-0">
-            <div className="truncate text-base font-semibold text-white">
-              {member.name}
-            </div>
-
-            <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-white/60">
-              {member.location ? (
-                <span className="whitespace-nowrap">{member.location}</span>
-              ) : null}
-
-              {member.location ? (
-                <span className="text-white/25">•</span>
-              ) : null}
-
-              <span className="line-clamp-1 min-w-0 text-white/70">
-                {member.roles.join(" · ")}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {website ? (
-          <div className="shrink-0">
-            <ExternalLinkButton link={website} />
-          </div>
-        ) : null}
-      </div>
-
-      <div className="mt-4 text-sm text-white/75">{member.bio}</div>
-
-      {socials.length > 0 ? (
-        <div className="mt-auto flex flex-wrap gap-2 pt-5">
-          {socials.map((l) => (
-            <ExternalLinkButton
-              key={`${member.name}-${l.kind}-${l.href}`}
-              link={l}
-            />
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function GetListedCallout({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn(
-        "rounded-3xl border border-white/10 bg-white/5 p-5 text-sm text-white/70",
-        className
-      )}
-    >
-      <div className="font-semibold text-white">Want to get listed?</div>
-      <div className="mt-1 text-white/70">
-        Send your name, roles, city, a short bio, a headshot, and any links you
-        want shown. We keep this directory manually curated.
-      </div>
-
-      <div className="mt-3 flex flex-wrap gap-2">
-        <Link
-          href={FWFA_LINKS.discord}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-sm font-semibold text-black hover:opacity-90"
-        >
-          <DiscordIcon className="h-4 w-4" />
-          Submit in Discord
-        </Link>
-
-        <Link
-          href={FWFA_LINKS.instagram}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-xl border border-white/12 bg-white/5 px-3 py-2 text-sm font-semibold text-white hover:bg-white/10"
-        >
-          <InstagramIcon className="h-4 w-4" />
-          DM on Instagram
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-const ROLE_OPTIONS: string[] = [
-  "All roles",
-  "Actor",
-  "Actress",
-  "Producer",
-  "Executive Producer",
-  "Co-Producer",
-  "Associate Producer",
-  "Line Producer",
-  "Unit Production Manager (UPM)",
-  "Production Coordinator",
-  "Production Secretary",
-  "Production Assistant (PA)",
-  "Director",
-  "1st Assistant Director (1st AD)",
-  "2nd Assistant Director (2nd AD)",
-  "2nd 2nd Assistant Director (2nd 2nd AD)",
-  "Script Supervisor",
-  "Writer",
-  "Screenwriter",
-  "Showrunner",
-  "Director of Photography (DP)",
-  "Cinematographer",
-  "Camera Operator",
-  "Steadicam Operator",
-  "1st Assistant Camera (1st AC)",
-  "2nd Assistant Camera (2nd AC)",
-  "DIT (Digital Imaging Technician)",
-  "Video Assist",
-  "Drone Pilot",
-  "Photographer",
-  "Unit Stills Photographer",
-  "Gaffer",
-  "Best Boy Electric",
-  "Electrician",
-  "Lighting Technician",
-  "Key Grip",
-  "Best Boy Grip",
-  "Grip",
-  "Dolly Grip",
-  "Production Sound Mixer",
-  "Boom Operator",
-  "Sound Utility",
-  "Production Designer",
-  "Art Director",
-  "Set Decorator",
-  "Props Master",
-  "Prop Assistant",
-  "Set Dresser",
-  "Construction Coordinator",
-  "Scenic Artist",
-  "Graphic Designer (Art Dept)",
-  "Costume Designer",
-  "Wardrobe Supervisor",
-  "Costumer",
-  "Set Costumer",
-  "Key Makeup Artist",
-  "Makeup Artist",
-  "Key Hair Stylist",
-  "Hair Stylist",
-  "SFX Makeup Artist",
-  "Location Manager",
-  "Assistant Location Manager",
-  "Location Scout",
-  "Transportation Coordinator",
-  "Driver",
-  "Picture Car Coordinator",
-  "Craft Service",
-  "Catering",
-  "Editor",
-  "Assistant Editor",
-  "Colorist",
-  "Sound Designer",
-  "Re-Recording Mixer",
-  "Composer",
-  "VFX Supervisor",
-  "VFX Artist",
-  "Motion Graphics Designer",
-  "Production Accountant",
-  "Safety Officer",
-];
+const PAGE_SIZE = 30;
 
 export default function MembersPage() {
   const [query, setQuery] = useState("");
   const [role, setRole] = useState<string>("All roles");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  const filtered = useMemo(() => {
-    const q = normalize(query);
+  // Keep search behavior: use existing hook for query filtering only.
+  const queryFiltered = useFilteredMembers({
+    members: MEMBERS,
+    query,
+    role: "All roles",
+  });
 
-    return MEMBERS.filter((m) => {
-      const roleMatch =
-        role === "All roles"
-          ? true
-          : m.roles.some(
-              (r) => canonicalizeRoleForSearch(r) === normalize(role)
-            );
+  const roleFiltered = useMemo(() => {
+    if (!role || role === "All roles") return queryFiltered;
 
-      const tokens = roleTokens(m.roles);
+    // Department selection: role will be "dept:Camera Department"
+    if (role.startsWith("dept:")) {
+      const dept = role.slice("dept:".length);
+      const deptRoles = DEPT_TO_ROLES.get(dept) ?? [];
+      const deptRoleSet = new Set(deptRoles.map((r) => normalizeRoleLabel(r)));
 
-      const haystack = [m.name, m.location ?? "", m.bio, ...m.roles, ...tokens]
-        .join(" ")
-        .toLowerCase();
+      return queryFiltered.filter((m: any) => {
+        const memberRoles: string[] = Array.isArray(m.roles)
+          ? m.roles
+          : m.role
+          ? [m.role]
+          : [];
 
-      const queryMatch = matchesQuery(haystack, q);
+        return memberRoles.some((mr) =>
+          deptRoleSet.has(normalizeRoleLabel(mr))
+        );
+      });
+    }
 
-      return roleMatch && queryMatch;
-    }).sort((a, b) => a.name.localeCompare(b.name));
+    // If the user somehow selected the dept marker row, ignore it
+    if (role.startsWith("__DEPT__|")) return queryFiltered;
+
+    // Specific role selection
+    const selected = normalizeRoleLabel(role);
+
+    return queryFiltered.filter((m: any) => {
+      const memberRoles: string[] = Array.isArray(m.roles)
+        ? m.roles
+        : m.role
+        ? [m.role]
+        : [];
+
+      return memberRoles.some((mr) => normalizeRoleLabel(mr) === selected);
+    });
+  }, [queryFiltered, role]);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
   }, [query, role]);
 
+  const visible = useMemo(
+    () => roleFiltered.slice(0, visibleCount),
+    [roleFiltered, visibleCount]
+  );
+
+  const canLoadMore = visibleCount < roleFiltered.length;
+
   return (
-    // KEY FIX: overflow-hidden on the OUTERMOST wrapper (same as /about)
-    <main className="film-grain relative min-h-screen overflow-hidden bg-[#05060a] text-white">
+    <div className="film-grain relative flex min-h-screen flex-col overflow-hidden bg-[#05060a] text-white">
       {/* Background */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-white/10 blur-3xl" />
@@ -494,76 +296,58 @@ export default function MembersPage() {
 
       <Header />
 
-      <section className="relative z-10">
-        <div className="mx-auto max-w-6xl px-5 pb-14 pt-10 sm:px-6 sm:pt-14">
-          <div className="flex flex-col gap-3">
-            <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-              Local talent and crew
-            </h1>
-            <p className="max-w-3xl text-pretty text-base text-white/70 sm:text-lg">
-              Search by name, role, city, keywords, or acronyms; then filter by
-              role to crew up fast.
-            </p>
-          </div>
+      <main className="relative z-10 flex-1">
+        <section>
+          <div className="mx-auto max-w-6xl px-5 pb-14 pt-10 sm:px-6 sm:pt-14">
+            <div className="flex flex-col gap-3">
+              <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+                Local talent and crew
+              </h1>
+              <p className="max-w-3xl text-pretty text-base text-white/70 sm:text-lg">
+                Search by name, role, city, keywords, or acronyms; then filter
+                by role to crew up fast.
+              </p>
+            </div>
 
-          <div className="mt-6">
-            <GetListedCallout />
-          </div>
+            <div className="mt-6">
+              <GetListedCallout />
+            </div>
 
-          <div className="mt-6 grid gap-3 rounded-3xl border border-white/10 bg-white/5 p-4 sm:grid-cols-5 sm:items-center">
-            <div className="min-w-0 sm:col-span-3">
-              <label className="block text-xs text-white/60">Search</label>
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Type a name, role, city, or keyword (e.g., PA, DP, acting)…"
-                className="mt-1 w-full min-w-0 rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/90 placeholder:text-white/40 outline-none focus:border-white/20"
+            <MembersFilters
+              query={query}
+              setQuery={setQuery}
+              role={role}
+              setRole={setRole}
+              roleOptions={ROLE_OPTIONS}
+              showingCount={visible.length}
+              totalCount={roleFiltered.length}
+            />
+
+            <MembersGrid members={visible} />
+
+            {roleFiltered.length === 0 ? <EmptyState /> : null}
+
+            {roleFiltered.length > 0 && canLoadMore ? (
+              <LoadMoreButton
+                onClick={() =>
+                  setVisibleCount((v) =>
+                    Math.min(roleFiltered.length, v + PAGE_SIZE)
+                  )
+                }
               />
+            ) : null}
+
+            <div className="mt-10">
+              <GetListedCallout />
             </div>
 
-            <div className="min-w-0 sm:col-span-2">
-              <label className="block text-xs text-white/60">Role</label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="mt-1 w-full min-w-0 rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/90 outline-none focus:border-white/20"
-              >
-                {ROLE_OPTIONS.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="mt-2 text-xs text-white/50 sm:col-span-5">
-              Showing {filtered.length} result{filtered.length === 1 ? "" : "s"}
-              .
-            </div>
+            {/* spacer so content never kisses footer */}
+            <div className="h-10" />
           </div>
+        </section>
+      </main>
 
-          <div className="mt-10 grid gap-4 lg:grid-cols-2">
-            {filtered.map((m) => (
-              <MemberCard key={m.name} member={m} />
-            ))}
-          </div>
-
-          {filtered.length === 0 ? (
-            <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-white/70">
-              <div className="font-semibold text-white">No matches yet.</div>
-              <div className="mt-1">
-                Try a different spelling, acronym, or role.
-              </div>
-            </div>
-          ) : null}
-
-          <div className="mt-10">
-            <GetListedCallout />
-          </div>
-
-          <Footer />
-        </div>
-      </section>
-    </main>
+      <Footer />
+    </div>
   );
 }

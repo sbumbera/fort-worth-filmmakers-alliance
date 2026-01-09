@@ -24,7 +24,8 @@ const DEFAULT_NAV: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
   { label: "Local Roster", href: "/roster" },
-  { label: "Resources", href: "/resources" },
+  { label: "Directory", href: "/directory" },
+  { label: "Tools", href: "/tools" },
 ];
 
 export default function Header({
