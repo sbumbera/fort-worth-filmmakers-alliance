@@ -126,7 +126,7 @@ export default function NonUnionCrewCalculatorPage() {
             <div className="flex flex-col gap-3">
               <div className="flex flex-wrap items-center gap-3">
                 <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-                  Non-Union Crew Calculator
+                  Non-Union Crew Calculator and Invoicing
                 </h1>
                 <span className="rounded-full border border-white/12 bg-white/5 px-3 py-1 text-xs font-semibold text-white/70">
                   Educational
