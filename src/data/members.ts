@@ -44,11 +44,6 @@ export const MEMBERS: Member[] = [
     },
     links: [
       {
-        kind: "website",
-        href: "https://fwfilmmakers.org/",
-        label: "Website",
-      },
-      {
         kind: "instagram",
         href: "https://www.instagram.com/jesseleebumbera/",
         label: "Instagram",
