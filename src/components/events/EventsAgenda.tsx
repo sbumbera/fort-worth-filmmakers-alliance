@@ -72,8 +72,24 @@ export default function EventsAgenda({
                         {timeLabel(e.start)}
                       </div>
                     </div>
+
                     <div className="mt-1 text-sm text-white/60">
-                      {e.locationName || "Location: check organizer links"}
+                      {(() => {
+                        const anyE = e as unknown as {
+                          locationName?: string;
+                          location?: string;
+                          locationCity?: string;
+                          where?: string;
+                        };
+
+                        return (
+                          anyE.locationName ??
+                          anyE.location ??
+                          anyE.locationCity ??
+                          anyE.where ??
+                          "Location: check organizer links"
+                        );
+                      })()}
                     </div>
                   </button>
                 ))}
