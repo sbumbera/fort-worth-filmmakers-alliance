@@ -1,4 +1,5 @@
 // src/lib/directorySearch.ts
+
 import { useMemo } from "react";
 import type {
   LinkKind,
@@ -81,12 +82,7 @@ export function useFilteredDirectorySections({
       .map((section) => {
         const items = sanitizeLinks(section.items)
           .filter((item) => {
-            const haystack = [
-              item.name,
-              item.location ?? "",
-              item.description,
-              ...(item.keywords ?? []),
-            ]
+            const haystack = [item.name, item.location ?? "", item.description]
               .join(" ")
               .toLowerCase();
 

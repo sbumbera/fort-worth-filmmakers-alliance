@@ -9,7 +9,8 @@ export type LinkKind =
   | "tiktok"
   | "x"
   | "linkedin"
-  | "email";
+  | "email"
+  | "phone";
 
 export type DirectoryLink = {
   kind: LinkKind;
@@ -17,12 +18,53 @@ export type DirectoryLink = {
   label?: string;
 };
 
+export type MeetupRecurrence =
+  | {
+      kind: "weekly";
+      dayOfWeek: number; // 0=Sun..6=Sat
+      hour24: number;
+      minute: number;
+    }
+  | {
+      kind: "monthlyNthDow";
+      nth: number; // 1..5
+      dayOfWeek: number; // 0=Sun..6=Sat
+      hour24: number;
+      minute: number;
+    };
+
+export type DirectoryMeetup = {
+  title?: string;
+  recurrence: MeetupRecurrence;
+
+  // If true, UI should display TBA and avoid generating directions.
+  isTBA?: boolean;
+
+  locationName?: string; // "Strangeways"
+  locationCity?: string; // "Dallas, TX"
+  address?: string; // Optional: full address
+  mapsQuery?: string; // Optional: override query string for maps
+  notes?: string; // Optional: additional note shown in modal and included in Add-to-Calendar notes
+
+  // Optional: override default duration used in calendar instances.
+  durationMinutes?: number;
+};
+
 export type DirectoryItem = {
+  id: string; // generated from name
   name: string;
   description: string;
   location?: string;
-  keywords?: string[];
   links: DirectoryLink[];
+
+  // Optional recurring meetups, used by /events calendar + homepage widgets
+  meetups?: DirectoryMeetup[];
+
+  /**
+   * If true, this org is the “featured” org for the homepage “Next” meetup card.
+   * Used by getHomeFeaturedOrg() so Home and Events pull from the same source of truth.
+   */
+  isHomeFeatured?: boolean;
 };
 
 export type DirectorySection = {
@@ -32,11 +74,37 @@ export type DirectorySection = {
   items: DirectoryItem[];
 };
 
+function slugify(input: string) {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function withIds(
+  sections: Array<
+    Omit<DirectorySection, "items"> & { items: Omit<DirectoryItem, "id">[] }
+  >,
+): DirectorySection[] {
+  return sections.map((section) => ({
+    ...section,
+    items: section.items.map((it) => ({
+      ...it,
+      id: slugify(it.name),
+    })),
+  }));
+}
+
 // ============================================================================
 // SECTIONS (ADD NEW SECTION HERE)
 // ============================================================================
 
-export const SECTIONS: DirectorySection[] = [
+const SECTIONS_RAW: Array<
+  Omit<DirectorySection, "items"> & { items: Omit<DirectoryItem, "id">[] }
+> = [
   // ==========================================================================
   // GOVERNMENT (ADD ORGS HERE)
   // ==========================================================================
@@ -68,7 +136,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["Dallas Film Commission", "Dallas Creates"],
       },
       {
         name: "Fort Worth Film Commission",
@@ -87,7 +154,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["Film Fort Worth"],
       },
       {
         name: "Texas Film Commission",
@@ -121,7 +187,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "YouTube",
           },
         ],
-        keywords: ["TFC", "Film Friendly Texas", "TMIIIP"],
       },
       {
         name: "City of Arlington – Film Friendly Office",
@@ -150,10 +215,9 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["Arlington Film Friendly", "Film Friendly Arlington"],
       },
       {
-        name: "City of Denton – Film Friendly Office",
+        name: "City of Denton – Economic Development",
         location: "Denton",
         description:
           "Denton is a Film Friendly Texas city with a local permit process and support coordinated through city economic development.",
@@ -165,11 +229,30 @@ export const SECTIONS: DirectorySection[] = [
           },
           {
             kind: "instagram",
-            href: "https://www.instagram.com/cityofdenton",
+            href: "https://www.instagram.com/dentoneconomicdevelopment/",
             label: "Instagram",
           },
+          {
+            kind: "facebook",
+            href: "https://www.facebook.com/DentonEconomicDevelopment",
+            label: "Facebook",
+          },
+          {
+            kind: "linkedin",
+            href: "https://www.linkedin.com/company/denton-tx-office-of-economic-development ",
+            label: "LinkedIn",
+          },
+          {
+            kind: "email",
+            href: "mailto:economic.development@cityofdenton.com",
+            label: "Email",
+          },
+          {
+            kind: "phone",
+            href: "tel:+19403497776",
+            label: "(940) 349-7776",
+          },
         ],
-        keywords: ["Film Friendly Denton"],
       },
     ],
   },
@@ -196,7 +279,19 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["DIFF", "Dallas International Film Festival"],
+      },
+      {
+        name: "Dallas Film Social",
+        location: "Dallas",
+        description:
+          "A film and photography social founded by a local director. Hosts 4 meetups each year.",
+        links: [
+          {
+            kind: "instagram",
+            href: "https://www.instagram.com/dallas.film.social",
+            label: "Instagram",
+          },
+        ],
       },
       {
         name: "Dallas Producers Association (DPA)",
@@ -220,7 +315,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["DPA"],
       },
       {
         name: "Dallas Screenwriters Association (DSA)",
@@ -244,7 +338,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["DSA"],
       },
       {
         name: "Dallas Filmmakers Alliance (DFA)",
@@ -268,7 +361,18 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["DFA"],
+        meetups: [
+          {
+            title: "DFA Weekly Meetup",
+            recurrence: { kind: "weekly", dayOfWeek: 3, hour24: 19, minute: 0 },
+            locationName: "Strangeways",
+            locationCity: "Dallas, TX",
+            address: "2429 N Fitzhugh Ave, Dallas, TX 75204",
+            mapsQuery: "Strangeways Dallas TX",
+            notes:
+              "Recurring listing only; confirm updates and special events on DFA channels.",
+          },
+        ],
       },
       {
         name: "Women in Film Dallas (WIFD)",
@@ -288,7 +392,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["WIF Dallas", "WIFD"],
       },
       {
         name: "Texas Media Production Alliance (TXMPA)",
@@ -304,7 +407,6 @@ export const SECTIONS: DirectorySection[] = [
           },
           { kind: "x", href: "https://x.com/TXMPA", label: "X" },
         ],
-        keywords: ["TXMPA"],
       },
       {
         name: "Texas Association of Motion Media Professionals (TAMMP)",
@@ -318,7 +420,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Facebook",
           },
         ],
-        keywords: ["TAMMP", "TxAMMP"],
       },
       {
         name: "Fort Worth Filmmakers (FWF)",
@@ -342,7 +443,19 @@ export const SECTIONS: DirectorySection[] = [
             label: "Discord",
           },
         ],
-        keywords: ["FWF", "Fort Worth Filmmakers"],
+
+        // Home “Next” card uses this org. Only set ONE org to true.
+        isHomeFeatured: true,
+
+        meetups: [
+          {
+            title: "FWF Meetup",
+            isTBA: true,
+            recurrence: { kind: "weekly", dayOfWeek: 0, hour24: 19, minute: 0 },
+            notes:
+              "Meetup details are TBA. Check Instagram and Discord for updates.",
+          },
+        ],
       },
       {
         name: "Ladies in Film & Television (Dallas)",
@@ -361,7 +474,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Facebook",
           },
         ],
-        keywords: ["Ladies in Film", "Women in Film", "WIF Dallas", "LIFT"],
       },
       {
         name: "A Bunch of Short Guys (ABOSG)",
@@ -375,7 +487,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: ["ABOSG", "short films"],
       },
       {
         name: "AICP Southwest",
@@ -385,7 +496,6 @@ export const SECTIONS: DirectorySection[] = [
         links: [
           { kind: "website", href: "https://www.aicp.com/", label: "Website" },
         ],
-        keywords: ["AICP", "commercial production"],
       },
       {
         name: "American Advertising Federation Dallas (AAF Dallas)",
@@ -399,7 +509,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: ["AAF Dallas", "advertising"],
       },
       {
         name: "Arlington Film Society",
@@ -413,7 +522,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: ["Arlington Film Society"],
       },
       {
         name: "Dallas Society of Visual Communications (DSVC)",
@@ -423,7 +531,6 @@ export const SECTIONS: DirectorySection[] = [
         links: [
           { kind: "website", href: "https://dsvc.org", label: "Website" },
         ],
-        keywords: ["DSVC", "visual communications"],
       },
       {
         name: "Video Association of Dallas",
@@ -438,7 +545,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Facebook",
           },
         ],
-        keywords: ["video production", "VAD"],
       },
       {
         name: "Visual Effects Society (VES) – Texas Section",
@@ -452,7 +558,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: ["VES", "visual effects", "VFX"],
       },
     ],
   },
@@ -488,7 +593,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["Horror Cult"],
       },
       {
         name: "Rack Focus",
@@ -507,7 +611,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Facebook",
           },
         ],
-        keywords: ["RackFocus"],
       },
       {
         name: "48 Hour Film Project – Dallas",
@@ -531,7 +634,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["48HFP", "48 Hour"],
       },
       {
         name: "Video Fest",
@@ -552,7 +654,6 @@ export const SECTIONS: DirectorySection[] = [
           },
           { kind: "x", href: "https://x.com/videofest", label: "X" },
         ],
-        keywords: ["Video Race", "Dallas VideoFest"],
       },
     ],
   },
@@ -583,7 +684,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["DIFF"],
       },
       {
         name: "Oak Cliff Film Festival (OCFF)",
@@ -602,7 +702,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["OCFF"],
       },
       {
         name: "Denton Black Film Festival (DBFF)",
@@ -622,7 +721,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["DBFF"],
       },
       {
         name: "Thin Line Fest",
@@ -642,7 +740,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["Thin Line"],
       },
       {
         name: "USA Film Festival",
@@ -666,7 +763,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["USAFF"],
       },
       {
         name: "Asian Film Festival of Dallas (AFFD)",
@@ -691,7 +787,6 @@ export const SECTIONS: DirectorySection[] = [
           },
           { kind: "x", href: "https://x.com/AFFD", label: "X" },
         ],
-        keywords: ["AFFD"],
       },
       {
         name: "Lone Star Film Festival",
@@ -715,7 +810,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["LSFF"],
       },
       {
         name: "Panther City Film Festival",
@@ -734,7 +828,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Facebook",
           },
         ],
-        keywords: ["FWIFS", "Panther City FF"],
       },
       {
         name: "African Film Festival (TAFF)",
@@ -753,7 +846,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["TAFF", "African Film Festival"],
       },
       {
         name: "EarthxFilm",
@@ -768,7 +860,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["EarthxFilm", "EarthX"],
       },
       {
         name: "Jewish Film Festival of Dallas",
@@ -782,7 +873,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: ["JFFD", "Jewish Film Festival"],
       },
       {
         name: "Pegasus Film Festival",
@@ -801,7 +891,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["Pegasus Film Festival"],
       },
       {
         name: "Topaz Film Festival",
@@ -815,7 +904,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: ["Topaz Film Festival"],
       },
     ],
   },
@@ -841,7 +929,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: ["creator economy", "influencers", "digital media"],
       },
       {
         name: "Texas Production Expo",
@@ -855,12 +942,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: [
-          "production expo",
-          "film gear",
-          "video production",
-          "trade show",
-        ],
       },
       {
         name: "CinéShow",
@@ -869,11 +950,6 @@ export const SECTIONS: DirectorySection[] = [
           "Cinema industry conference bringing together studios, exhibitors, vendors, and professionals for presentations, panels, and business-focused sessions.",
         links: [
           { kind: "website", href: "https://cineshow.org", label: "Website" },
-        ],
-        keywords: [
-          "cinema conference",
-          "film exhibition",
-          "industry conference",
         ],
       },
       {
@@ -887,11 +963,6 @@ export const SECTIONS: DirectorySection[] = [
             href: "https://circlesconference.com",
             label: "Website",
           },
-        ],
-        keywords: [
-          "filmmaking conference",
-          "storytelling",
-          "creative conference",
         ],
       },
     ],
@@ -923,7 +994,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["soundstages", "Dallas soundstage"],
       },
       {
         name: "XR Studios 214",
@@ -947,7 +1017,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["virtual production", "XR 214"],
       },
       {
         name: "SGS Studios at AllianceTexas (Hillwood)",
@@ -961,7 +1030,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: ["SGS", "AllianceTexas", "Hillwood", "Taylor Sheridan"],
       },
       {
         name: "101 Studios",
@@ -990,7 +1058,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "LinkedIn",
           },
         ],
-        keywords: ["101", "Taylor Sheridan"],
       },
       {
         name: "Red Productions",
@@ -1019,7 +1086,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "LinkedIn",
           },
         ],
-        keywords: ["Red Productions", "production studio", "Dallas studio"],
       },
       {
         name: "Capernaum Studios",
@@ -1043,7 +1109,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["Capernaum Studios", "backlot", "North Texas studio"],
       },
       {
         name: "Air Studios",
@@ -1057,7 +1122,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: ["Air Studios"],
       },
       {
         name: "AMS Pictures",
@@ -1071,7 +1135,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: ["AMS Pictures"],
       },
       {
         name: "Backlot Studio and Workspace",
@@ -1091,7 +1154,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Facebook",
           },
         ],
-        keywords: ["Backlot", "BacklotFW"],
       },
       {
         name: "CRM Studios",
@@ -1106,7 +1168,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Facebook",
           },
         ],
-        keywords: ["CRM Studios"],
       },
       {
         name: "DHD Films",
@@ -1121,7 +1182,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["DHD Films"],
       },
       {
         name: "Eyecon Video Productions",
@@ -1135,7 +1195,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: ["Eyecon Video"],
       },
       {
         name: "Frisco Studios",
@@ -1149,7 +1208,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: ["Frisco Studios"],
       },
       {
         name: "Gracepoint Media",
@@ -1168,7 +1226,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["Gracepoint Media"],
       },
       {
         name: "IdeaMan Studios",
@@ -1187,7 +1244,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["IdeaMan Studios"],
       },
       {
         name: "MPS Studios Dallas",
@@ -1202,7 +1258,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["MPS Studios"],
       },
       {
         name: "VFX Studios",
@@ -1217,7 +1272,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["VFX Studios"],
       },
     ],
   },
@@ -1243,7 +1297,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: ["casting", "extras"],
       },
       {
         name: "Katz Kasting",
@@ -1262,7 +1315,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Facebook",
           },
         ],
-        keywords: ["Katz"],
       },
       {
         name: "Buffalo Casting",
@@ -1286,7 +1338,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["Buffalo"],
       },
       {
         name: "Legacy Casting",
@@ -1310,7 +1361,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["Legacy"],
       },
       {
         name: "Kim Dawson Agency",
@@ -1334,7 +1384,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["Kim Dawson"],
       },
       {
         name: "The Campbell Agency",
@@ -1363,7 +1412,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram (Models)",
           },
         ],
-        keywords: ["Campbell"],
       },
       {
         name: "Mary Collins Agency",
@@ -1392,7 +1440,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "LinkedIn",
           },
         ],
-        keywords: ["Mary Collins"],
       },
       {
         name: "Grogan Management (Damaris Grogan)",
@@ -1411,7 +1458,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["Grogan Management", "Damaris Grogan"],
       },
     ],
   },
@@ -1447,7 +1493,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "YouTube",
           },
         ],
-        keywords: ["SAG", "AFTRA"],
       },
       {
         name: "IATSE Local 484",
@@ -1466,7 +1511,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["IATSE", "484"],
       },
       {
         name: "Teamsters Local 745",
@@ -1480,7 +1524,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: ["Teamsters", "745"],
       },
       {
         name: "Directors Guild of America (DGA)",
@@ -1495,7 +1538,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Facebook",
           },
         ],
-        keywords: ["DGA"],
       },
       {
         name: "Writers Guild of America West (WGAW)",
@@ -1505,7 +1547,6 @@ export const SECTIONS: DirectorySection[] = [
         links: [
           { kind: "website", href: "https://www.wga.org", label: "Website" },
         ],
-        keywords: ["WGA", "WGAW"],
       },
     ],
   },
@@ -1546,7 +1587,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "LinkedIn",
           },
         ],
-        keywords: ["CUT", "Tango"],
       },
       {
         name: "Reel FX",
@@ -1571,7 +1611,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "YouTube",
           },
         ],
-        keywords: ["ReelFX"],
       },
       {
         name: "Dallas Audio Post",
@@ -1590,7 +1629,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["DAP", "ADR", "mixing"],
       },
       {
         name: "Camp Lucky",
@@ -1615,7 +1653,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "LinkedIn",
           },
         ],
-        keywords: ["Lucky Post", "The Volume"],
       },
       {
         name: "Republic (The Republic)",
@@ -1635,7 +1672,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["Republic Editorial"],
       },
     ],
   },
@@ -1681,7 +1717,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "YouTube",
           },
         ],
-        keywords: ["location rentals", "studios for rent"],
       },
       {
         name: "ShareGrid (Dallas)",
@@ -1710,7 +1745,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "YouTube",
           },
         ],
-        keywords: ["gear sharing"],
       },
       {
         name: "ProductionHUB",
@@ -1739,7 +1773,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "LinkedIn",
           },
         ],
-        keywords: ["crew directory", "vendor directory"],
       },
       {
         name: "Stage 32",
@@ -1769,7 +1802,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "LinkedIn",
           },
         ],
-        keywords: ["education", "networking"],
       },
       {
         name: "Texas Production Directory (Texas Film Commission)",
@@ -1783,7 +1815,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: ["crew search", "support services"],
       },
       {
         name: "Staff Me Up",
@@ -1803,7 +1834,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "LinkedIn",
           },
         ],
-        keywords: ["jobs", "crew gigs"],
       },
       {
         name: "Backstage",
@@ -1827,7 +1857,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Facebook",
           },
         ],
-        keywords: ["Backstage", "casting", "auditions"],
       },
       {
         name: "MyCastingFile (MCF)",
@@ -1851,7 +1880,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Facebook",
           },
         ],
-        keywords: ["MCF", "MyCastingFile", "casting"],
       },
       {
         name: "Casting Networks",
@@ -1875,7 +1903,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Facebook",
           },
         ],
-        keywords: ["Casting Networks", "casting"],
       },
       {
         name: "Onset",
@@ -1894,7 +1921,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "LinkedIn",
           },
         ],
-        keywords: ["Onset", "casting platform"],
       },
       {
         name: "ActorBay",
@@ -1908,7 +1934,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: ["ActorBay", "casting"],
       },
     ],
   },
@@ -1934,12 +1959,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: [
-          "TCC",
-          "Fort Worth Film Collaborative",
-          "film training",
-          "crew training",
-        ],
       },
       {
         name: "KD Conservatory College of Film & Dramatic Arts",
@@ -1954,7 +1973,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["KD Conservatory"],
       },
       {
         name: "MediaTech Institute (Dallas)",
@@ -1973,7 +1991,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Facebook",
           },
         ],
-        keywords: ["MediaTech"],
       },
       {
         name: "Dallas Young Actors Studio (DYAS)",
@@ -1988,7 +2005,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["DYAS"],
       },
       {
         name: "Nancy Chartier Studios",
@@ -2007,7 +2023,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["Nancy Chartier"],
       },
       {
         name: "Cathryn Sullivan’s Acting for Film",
@@ -2021,7 +2036,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: ["Cathryn Sullivan"],
       },
       {
         name: "Sherrill Actors Studio",
@@ -2040,7 +2054,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["Sherrill"],
       },
       {
         name: "Fort Worth Actors Studio",
@@ -2050,7 +2063,6 @@ export const SECTIONS: DirectorySection[] = [
         links: [
           { kind: "website", href: "https://fwactors.com", label: "Website" },
         ],
-        keywords: ["FWAS"],
       },
       {
         name: "TBell Actors Studio",
@@ -2064,7 +2076,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: ["TBell", "Teresa Bell"],
       },
     ],
   },
@@ -2096,7 +2107,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["camera rentals", "lighting rentals"],
       },
       {
         name: "Panavision Dallas",
@@ -2120,7 +2130,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "LinkedIn",
           },
         ],
-        keywords: ["Panavision"],
       },
       {
         name: "Bolt Productions",
@@ -2144,7 +2153,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["Bolt"],
       },
       {
         name: "Electric Light & Power Co.",
@@ -2158,7 +2166,6 @@ export const SECTIONS: DirectorySection[] = [
             label: "Website",
           },
         ],
-        keywords: ["ELP", "grip", "lighting"],
       },
       {
         name: "MP&E Camera and Lighting (HDgear)",
@@ -2173,8 +2180,31 @@ export const SECTIONS: DirectorySection[] = [
             label: "Instagram",
           },
         ],
-        keywords: ["MP&E", "HDgear"],
       },
     ],
   },
 ];
+
+export const SECTIONS: DirectorySection[] = withIds(SECTIONS_RAW);
+
+// ============================================================================
+// Helpers: used by /events and homepage widgets
+// ============================================================================
+
+export function flattenDirectoryItems(): DirectoryItem[] {
+  return SECTIONS.flatMap((s) => s.items);
+}
+
+export function findDirectoryItemById(id: string): DirectoryItem | undefined {
+  return flattenDirectoryItems().find((x) => x.id === id);
+}
+
+export function findDirectoryItemByName(
+  name: string,
+): DirectoryItem | undefined {
+  return flattenDirectoryItems().find((x) => x.name === name);
+}
+
+export function getHomeFeaturedOrg(): DirectoryItem | undefined {
+  return flattenDirectoryItems().find((x) => x.isHomeFeatured);
+}

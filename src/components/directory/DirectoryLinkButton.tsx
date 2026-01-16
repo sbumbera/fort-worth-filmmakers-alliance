@@ -1,4 +1,5 @@
 // src/components/directory/DirectoryLinkButton.tsx
+
 import Link from "next/link";
 import type { DirectoryLink } from "@/data/directory";
 import {
@@ -11,11 +12,15 @@ import {
   XIcon,
   LinkedInIcon,
   EmailIcon,
+  PhoneIcon,
 } from "@/components/icons";
 
 export default function DirectoryLinkButton({ link }: { link: DirectoryLink }) {
   const isEmail = link.kind === "email";
-  const isExternal = !isEmail;
+  const isPhone = link.kind === "phone";
+
+  // Only open real web URLs in a new tab
+  const isExternal = !(isEmail || isPhone);
 
   const icon =
     link.kind === "instagram" ? (
@@ -34,6 +39,8 @@ export default function DirectoryLinkButton({ link }: { link: DirectoryLink }) {
       <XIcon className="h-4 w-4" />
     ) : link.kind === "linkedin" ? (
       <LinkedInIcon className="h-4 w-4" />
+    ) : link.kind === "phone" ? (
+      <PhoneIcon className="h-4 w-4" />
     ) : (
       <EmailIcon className="h-4 w-4" />
     );

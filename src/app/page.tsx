@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { InstagramIcon, DiscordIcon } from "@/components/icons";
 import { getUpcomingMeetups, formatMeetupDateTime } from "@/lib/meetupSchedule";
@@ -38,15 +37,13 @@ export default function HomePage() {
         <div className="absolute inset-0 [box-shadow:inset_0_0_120px_rgba(0,0,0,0.85)]" />
       </div>
 
-      {/* Top nav */}
       <Header activeHref="/" />
 
-      {/* Main content grows to fill space */}
       <main className="relative z-10 flex-1 overflow-x-hidden">
         <section>
-          <div className="mx-auto grid max-w-6xl gap-10 px-5 pb-14 pt-14 sm:px-6 sm:pt-14 lg:grid-cols-12 lg:items-center">
+          <div className="mx-auto grid max-w-6xl gap-10 px-5 pb-14 pt-16 sm:px-6 sm:pt-20 lg:grid-cols-12 lg:items-start lg:pt-28">
             <div className="lg:col-span-7">
-              {/* MOBILE: metadata line (no leading separator on wrapped lines) */}
+              {/* MOBILE: metadata line */}
               <div className="mb-5 sm:hidden flex flex-wrap items-center text-[11px] leading-snug text-white/55">
                 {[
                   "Fort Worth",
@@ -65,9 +62,9 @@ export default function HomePage() {
 
               {/* DESKTOP+: pills */}
               <div className="mb-5 hidden sm:flex flex-wrap gap-x-3 gap-y-2">
-                <Pill>Fort Worth</Pill>
+                <Pill>DFW</Pill>
                 <Pill>Indie-first</Pill>
-                <Pill>Talent spotlight</Pill>
+                <Pill>Talent & Crew spotlight</Pill>
                 <Pill>Meet. Crew. Shoot.</Pill>
               </div>
 
@@ -111,7 +108,6 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-black/30" />
 
                 <div className="relative">
-                  {/* Header row */}
                   <div className="flex items-start justify-between gap-4">
                     <div className="text-sm font-semibold">
                       Upcoming meetups
@@ -127,7 +123,6 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  {/* Meetups: side-by-side on sm, stacked on lg (because the right column becomes narrow) */}
                   <div className="mt-4 grid items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-1">
                     <div className="h-full rounded-2xl border border-white/10 bg-black/35 p-4">
                       <div className="flex items-center justify-between gap-3">
@@ -137,64 +132,51 @@ export default function HomePage() {
                       <div className="mt-2 text-sm text-white/90">
                         {next.title}
                       </div>
+
                       <div className="mt-1 text-sm text-white/70">
-                        TBA
-                        {/* {formatMeetupDateTime(next.when)} */}
+                        {next.isTBA ? "TBA" : formatMeetupDateTime(next.when)}
                       </div>
+
                       <div className="mt-1 text-sm text-white/60">
-                        Fort Worth
-                        {/* {next.locationName}; {next.locationCity} */}
+                        {next.locationName}
+                        {next.locationCity ? `; ${next.locationCity}` : ""}
                       </div>
                     </div>
 
-                    {/*  
                     <div className="h-full rounded-2xl border border-white/10 bg-black/25 p-4">
                       <div className="text-sm font-semibold text-white/80">
                         Also coming up
                       </div>
+
                       <div className="mt-2 text-sm text-white/85">
                         {alsoComingUp.title}
                       </div>
+
                       <div className="mt-1 text-sm text-white/70">
-                        {formatMeetupDateTime(alsoComingUp.when)}
-                        TBA
+                        {alsoComingUp.isTBA
+                          ? "TBA"
+                          : formatMeetupDateTime(alsoComingUp.when)}
                       </div>
+
                       <div className="mt-1 text-sm text-white/60">
-                        {alsoComingUp.locationName}; {alsoComingUp.locationCity} 
-                        Arlington
+                        {alsoComingUp.locationName}
+                        {alsoComingUp.locationCity
+                          ? `; ${alsoComingUp.locationCity}`
+                          : ""}
                       </div>
-                    </div>*/}
+
+                      <Link
+                        href="/events"
+                        className="mt-3 inline-flex text-sm font-semibold text-white underline underline-offset-4 hover:opacity-90"
+                      >
+                        View calendar
+                      </Link>
+                    </div>
                   </div>
 
                   <div className="mt-3 text-xs text-white/55">
                     Any changes or special events are posted on Instagram and
-                    Discord.
-                  </div>
-
-                  <div className="mt-5 grid gap-3">
-                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                      <div className="text-xs text-white/60">What happens</div>
-                      <div className="mt-1 text-sm">
-                        Introductions, crew matchmaking, project pitches,
-                        feedback, and collabs.
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                      <div className="text-xs text-white/60">
-                        Talent directory
-                      </div>
-                      <div className="mt-1 text-sm text-white/80">
-                        A growing list of DPs, editors, sound, composers,
-                        actors, producers, and more.
-                      </div>
-                      <Link
-                        href="/members"
-                        className="mt-3 inline-flex text-sm font-semibold text-white underline underline-offset-4 hover:opacity-90"
-                      >
-                        Explore members
-                      </Link>
-                    </div>
+                    Discord. Be sure to follow all the orgs to stay in the loop!
                   </div>
 
                   <div className="mt-5 flex gap-3">
