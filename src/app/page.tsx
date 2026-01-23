@@ -1,3 +1,5 @@
+export const revalidate = 60;
+
 import Link from "next/link";
 import { InstagramIcon, DiscordIcon } from "@/components/icons";
 import { getUpcomingMeetups, formatMeetupDateTime } from "@/lib/meetupSchedule";

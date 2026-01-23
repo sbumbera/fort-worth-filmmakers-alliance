@@ -119,15 +119,28 @@ export function getUpcomingMeetups(nowInput?: Date): {
   return { next, alsoComingUp };
 }
 
+const TZ = "America/Chicago";
+
 export function formatMeetupDateTime(d: Date) {
-  const weekday = new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(
-    d,
-  );
-  const month = new Intl.DateTimeFormat("en-US", { month: "short" }).format(d);
-  const day = d.getDate();
+  const weekday = new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    timeZone: TZ,
+  }).format(d);
+
+  const month = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    timeZone: TZ,
+  }).format(d);
+
+  const day = new Intl.DateTimeFormat("en-US", {
+    day: "numeric",
+    timeZone: TZ,
+  }).format(d);
+
   const time = new Intl.DateTimeFormat("en-US", {
     hour: "numeric",
     minute: "2-digit",
+    timeZone: TZ,
   }).format(d);
 
   return `${weekday}, ${month} ${day} at ${time}`;
