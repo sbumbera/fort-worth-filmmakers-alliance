@@ -965,6 +965,29 @@ const SECTIONS_RAW: Array<
           },
         ],
       },
+      {
+        name: "Texas Mixer Mixer",
+        location: "Dallas",
+        description:
+          "This annual event brings aimed at location and post production audio brings together the industries top gear manufacturers and talent. Chalk full of seminas, gear expo, food, and beverages it's always an excellent opportunity to learn, network, and check out all the latest gear.",
+        links: [
+          {
+            kind: "website",
+            href: "https://www.texasmixermixer.com",
+            label: "Website",
+          },
+          {
+            kind: "facebook",
+            href: "https://www.facebook.com/people/Texas-Mixer-Mixer/61582856901442/",
+            label: "Facebook",
+          },
+          {
+            kind: "instagram",
+            href: "https://www.instagram.com/texasmixermixer/",
+            label: "Instagram",
+          },
+        ],
+      },
     ],
   },
 
@@ -1935,6 +1958,19 @@ const SECTIONS_RAW: Array<
           },
         ],
       },
+      {
+        name: "Production Contacts",
+        location: "National",
+        description:
+          "Simple, straight forward staff and crew directory for the TV, film, commercial and theater industries.",
+        links: [
+          {
+            kind: "website",
+            href: "https://productioncontacts.com/",
+            label: "Website",
+          },
+        ],
+      },
     ],
   },
 
@@ -2059,9 +2095,41 @@ const SECTIONS_RAW: Array<
         name: "Fort Worth Actors Studio",
         location: "Fort Worth",
         description:
-          "On-camera acting courses in Fort Worth focused on audition prep and scene work for film and TV across teen and adult levels.",
+          "Fort Worth Actors Studio offers on-camera acting classes for teens and adults with recurring Monday and Tuesday night sessions (Acting for the Camera, 6:45-9:15 PM), focusing on cold reading, audition skills, scene study, and improv to help students grow as confident performers in film and TV.",
         links: [
           { kind: "website", href: "https://fwactors.com", label: "Website" },
+        ],
+        meetups: [
+          {
+            title: "Weekly On-Camera Acting Classes",
+            recurrence: {
+              kind: "weekly",
+              dayOfWeek: 1,
+              hour24: 18,
+              minute: 45,
+            },
+            locationName: "Fort Worth Actors Studio",
+            locationCity: "Fort Worth, TX",
+            address: "2212 W Peter Smith St, Fort Worth, TX 76102",
+            mapsQuery: "2212 W Peter Smith St, Fort Worth, TX 76102",
+            notes:
+              "Acting for the Camera classes every Monday and Tuesday night, typically 6:45-9:15 PM; verify current schedule before attending.",
+          },
+          {
+            title: "Weekly On-Camera Acting Classes",
+            recurrence: {
+              kind: "weekly",
+              dayOfWeek: 2,
+              hour24: 18,
+              minute: 45,
+            },
+            locationName: "Fort Worth Actors Studio",
+            locationCity: "Fort Worth, TX",
+            address: "2212 W Peter Smith St, Fort Worth, TX 76102",
+            mapsQuery: "2212 W Peter Smith St, Fort Worth, TX 76102",
+            notes:
+              "Acting for the Camera classes every Monday and Tuesday night, typically 6:45-9:15 PM; verify current schedule before attending.",
+          },
         ],
       },
       {
@@ -2085,7 +2153,7 @@ const SECTIONS_RAW: Array<
   // ==========================================================================
   {
     id: "equipment",
-    title: "Equipment Rentals",
+    title: "Equipment and Rentals",
     subtitle:
       "Rental houses and vendors supplying camera, lighting, grip, power, and support gear in DFW.",
     items: [
@@ -2177,6 +2245,57 @@ const SECTIONS_RAW: Array<
           {
             kind: "instagram",
             href: "https://www.instagram.com/beyondtherental",
+            label: "Instagram",
+          },
+        ],
+      },
+      {
+        name: "Black Bird Carts",
+        location: "Dallas",
+        description:
+          "Equipment carts for sound mixers, DIT, and video assist. Choose from existing designs or contact us for a custom build.",
+        links: [
+          {
+            kind: "website",
+            href: "https://www.blackbirdcarts.com/",
+            label: "Website",
+          },
+          {
+            kind: "facebook",
+            href: "https://www.facebook.com/BlackbirdCarts/",
+            label: "Facebook",
+          },
+          {
+            kind: "instagram",
+            href: "https://www.instagram.com/blackbirdcarts",
+            label: "Instagram",
+          },
+          {
+            kind: "youtube",
+            href: "https://www.youtube.com/channel/UCu-LIlU9TnI1-syHLe0_-lA",
+            label: "YouTube",
+          },
+        ],
+      },
+      {
+        name: "Shine Cine",
+        location: "Fort Worth",
+        description:
+          "Cinema equipment rental house offering high-quality cameras, lenses, lighting, grip gear, and a dedicated camera prep space to support local filmmakers",
+        links: [
+          {
+            kind: "website",
+            href: "https://www.shinecine.com/",
+            label: "Website",
+          },
+          {
+            kind: "phone",
+            href: "tel:+16823646778",
+            label: "(682) 364-6778",
+          },
+          {
+            kind: "instagram",
+            href: "https://www.instagram.com/shinecinefw/",
             label: "Instagram",
           },
         ],

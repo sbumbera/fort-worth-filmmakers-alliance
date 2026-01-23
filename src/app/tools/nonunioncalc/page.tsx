@@ -30,7 +30,7 @@ export default function NonUnionCrewCalculatorPage() {
   // Calculator inputs
   const [dayRateStr, setDayRateStr] = useState<string>("");
   const [milesStr, setMilesStr] = useState<string>("");
-  const [mileageRateStr, setMileageRateStr] = useState<string>("0.70");
+  const [mileageRateStr, setMileageRateStr] = useState<string>("0.725");
 
   const dayRate = safeNumber(dayRateStr);
   const miles = safeNumber(milesStr);
@@ -95,7 +95,7 @@ export default function NonUnionCrewCalculatorPage() {
     const laborTotal = sumLabor(dayCalcs.map((x) => x.calc.dayPay));
     const otBeyond12Total = dayCalcs.reduce(
       (acc, x) => acc + x.calc.otBeyond12Pay,
-      0
+      0,
     );
     const mileagePay = sumMileage(miles, mileageRate);
     const grandTotal = laborTotal + mileagePay + expensesTotal;

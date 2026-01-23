@@ -11,7 +11,8 @@ export type LinkKind =
   | "imdb"
   | "email"
   | "backstage"
-  | "actorbay";
+  | "actorbay"
+  | "phone";
 
 export type MemberLink = {
   kind: LinkKind;
@@ -61,6 +62,11 @@ export const MEMBERS: Member[] = [
         kind: "imdb",
         href: "https://www.imdb.com/name/nm17860284/",
         label: "IMDB",
+      },
+      {
+        kind: "website",
+        href: "https://www.groganmanagement.com/",
+        label: "Agent",
       },
     ],
   },
@@ -169,6 +175,114 @@ export const MEMBERS: Member[] = [
       {
         kind: "instagram",
         href: "https://www.instagram.com/j.r._gutier",
+        label: "Instagram",
+      },
+    ],
+  },
+  {
+    name: "Nathan Paine",
+    location: "Fort Worth",
+    roles: ["Director of Photography (DP)", "Camera Operator"],
+    bio: "Howdy! My name is Nathan. I am a Fort Worth DP and Camera Operator with over a decade of narrative experience working my way up in Grip, Electric, and Camera Departments. I love storytelling with cinema and would love to chat about films and filmmaking with anyone who cares as much as I do. Let's bring back Texas indy films!",
+    image: {
+      src: "/members/n-paine.jpg",
+      alt: "Nathan Paine",
+    },
+    links: [
+      {
+        kind: "instagram",
+        href: "https://www.instagram.com/nathanaelpaine_dp/",
+        label: "Instagram",
+      },
+      {
+        kind: "imdb",
+        href: "https://www.imdb.com/name/nm6153669/",
+        label: "IMDB",
+      },
+    ],
+  },
+  {
+    name: "Thomas Collins",
+    location: "Fort Worth",
+    roles: ["Actor"],
+    bio: "A recent AADA graduate looking to make a big splash back home! With his background in theater, his conservatory training, and his love for the art; he’s got a lot to offer you! Whether you need a goof ball hero, or a dark heart; Thomas has got you covered!",
+    image: {
+      src: "/members/t-collins.jpg",
+      alt: "Thomas Collins",
+    },
+    links: [
+      {
+        kind: "backstage",
+        href: "https://www.backstage.com/tal/thomas-collins-1",
+        label: "Backstage",
+      },
+      {
+        kind: "imdb",
+        href: "https://www.imdb.com/name/nm17860288/",
+        label: "IMDB",
+      },
+      {
+        kind: "website",
+        href: "https://whomanagement.com/",
+        label: "Agent",
+      },
+    ],
+  },
+  {
+    name: "Alexa Estrada",
+    location: "Dallas",
+    roles: ["Actress"],
+    bio: "DFW local actress, profesional show girl (Veronica Valentine) and Selena Quintanilla Impersonator. Credits: “Timeless- Soldiers Wife” | “Veiled in Flesh” | “Zombie, Party Goer”. Can be contacted by Instagram, Email, Or Text.",
+    image: {
+      src: "/members/a-estrada.jpg",
+      alt: "Alexa Estrada",
+    },
+    links: [
+      {
+        kind: "email",
+        href: "Alexama017@gmail.com ",
+        label: "Email",
+      },
+      {
+        kind: "phone",
+        href: "tel:+14696627968",
+        label: "(469) 662-7968",
+      },
+      {
+        kind: "instagram",
+        href: "https://www.instagram.com/chanclaphobia/",
+        label: "Actress IG",
+      },
+      {
+        kind: "instagram",
+        href: "https://www.instagram.com/theveronicavalentine/",
+        label: "Show Girl IG",
+      },
+    ],
+  },
+  {
+    name: "Jett Dinh",
+    location: "Dallas",
+    roles: ["Actor"],
+    bio: "Jett Dinh is an actor and remote capable voice talent based in Dallas-Fort Worth, Texas. A versatile performer, he has appeared in short films, commercials, and live theatrical productions throughout the DFW area. In voiceover, Jett has credits in original Webtoon animated series, audio drama series with ARC Productions, and more. He began his acting career after first training in audio-visual production at Dallas College. Being mixed-race and Vietnamese American, Jett draws on his own life experiences, and his work often gravitates toward complex, layered characters and narrative-driven projects in both live-action and voiceover.",
+    image: {
+      src: "/members/j-dinh.jpg",
+      alt: "Jett Dinh",
+    },
+    links: [
+      {
+        kind: "imdb",
+        href: "https://www.imdb.com/name/nm17611552/",
+        label: "IMDB",
+      },
+      {
+        kind: "website",
+        href: "https://jettdinh.carrd.co/",
+        label: "Website",
+      },
+      {
+        kind: "instagram",
+        href: "https://instagram.com/jett.dinh/",
         label: "Instagram",
       },
     ],

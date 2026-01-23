@@ -95,7 +95,7 @@ export default function InputsPanel({
           <div>
             <FieldLabel
               title="Rate per mile"
-              help="Mileage reimbursement rate. 0.70/mi is standard in Texas"
+              help="Mileage reimbursement rate. 0.725/mi is standard in Texas"
             />
             <input
               inputMode="decimal"
@@ -105,7 +105,7 @@ export default function InputsPanel({
                 if (/^[0-9]*\.?[0-9]*$/.test(v)) setMileageRateStr(v);
               }}
               className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/90 placeholder:text-white/40 outline-none focus:border-white/20"
-              placeholder="0.70"
+              placeholder="0.725"
             />
           </div>
         </div>
@@ -157,8 +157,10 @@ export default function InputsPanel({
                       onChange={(e) =>
                         setLineItems((prev) =>
                           prev.map((x) =>
-                            x.id === it.id ? { ...x, title: e.target.value } : x
-                          )
+                            x.id === it.id
+                              ? { ...x, title: e.target.value }
+                              : x,
+                          ),
                         )
                       }
                       className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white/90 outline-none focus:border-white/20"
@@ -175,8 +177,8 @@ export default function InputsPanel({
                           prev.map((x) =>
                             x.id === it.id
                               ? { ...x, description: e.target.value }
-                              : x
-                          )
+                              : x,
+                          ),
                         )
                       }
                       className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white/90 outline-none focus:border-white/20"
@@ -194,8 +196,8 @@ export default function InputsPanel({
                         if (/^[0-9]*\.?[0-9]*$/.test(v)) {
                           setLineItems((prev) =>
                             prev.map((x) =>
-                              x.id === it.id ? { ...x, cost: v } : x
-                            )
+                              x.id === it.id ? { ...x, cost: v } : x,
+                            ),
                           );
                         }
                       }}

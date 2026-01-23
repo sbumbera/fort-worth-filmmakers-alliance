@@ -1,5 +1,4 @@
 // src/components/members/ExternalLinkButton.tsx
-import Link from "next/link";
 import type { MemberLink, LinkKind } from "@/data/members";
 import {
   InstagramIcon,
@@ -11,6 +10,7 @@ import {
   XIcon,
   LinkedInIcon,
   EmailIcon,
+  PhoneIcon,
   IMDbIcon,
   BackstageIcon,
   ActorBayIcon,
@@ -40,6 +40,8 @@ function getKindLabel(kind: LinkKind) {
       return "LinkedIn";
     case "email":
       return "Email";
+    case "phone":
+      return "Phone";
     case "imdb":
       return "IMDb";
     case "backstage":
@@ -51,6 +53,25 @@ function getKindLabel(kind: LinkKind) {
   }
 }
 
+function normalizeHref(kind: LinkKind, href: string) {
+  const raw = (href ?? "").trim();
+
+  if (kind === "email") {
+    if (!raw) return "";
+    return raw.toLowerCase().startsWith("mailto:") ? raw : `mailto:${raw}`;
+  }
+
+  if (kind === "phone") {
+    if (!raw) return "";
+    const cleaned = raw.replace(/[^\d+]/g, "");
+    return cleaned.toLowerCase().startsWith("tel:")
+      ? cleaned
+      : `tel:${cleaned}`;
+  }
+
+  return raw;
+}
+
 export default function ExternalLinkButton({
   link,
   compactLabelOnMobile,
@@ -60,11 +81,12 @@ export default function ExternalLinkButton({
 }) {
   const kind = link.kind;
   const label = link.label?.trim() ? link.label : getKindLabel(kind);
+  const href = normalizeHref(kind, link.href);
 
   const isEmail = kind === "email";
-  const isExternal = !isEmail;
+  const isPhone = kind === "phone";
+  const isExternal = !(isEmail || isPhone);
 
-  // Logo-only buttons that should fill the pill
   const isLogoOnly = kind === "actorbay" || kind === "imdb";
 
   const icon =
@@ -84,6 +106,10 @@ export default function ExternalLinkButton({
       <XIcon className="h-4 w-4" />
     ) : kind === "linkedin" ? (
       <LinkedInIcon className="h-4 w-4" />
+    ) : kind === "email" ? (
+      <EmailIcon className="h-4 w-4" />
+    ) : kind === "phone" ? (
+      <PhoneIcon className="h-4 w-4" />
     ) : kind === "imdb" ? (
       <IMDbIcon />
     ) : kind === "backstage" ? (
@@ -94,9 +120,11 @@ export default function ExternalLinkButton({
       <EmailIcon className="h-4 w-4" />
     );
 
+  if (!href) return null;
+
   return (
-    <Link
-      href={link.href}
+    <a
+      href={href}
       target={isExternal ? "_blank" : undefined}
       rel={isExternal ? "noopener noreferrer" : undefined}
       aria-label={isLogoOnly ? label : undefined}
@@ -105,14 +133,13 @@ export default function ExternalLinkButton({
         "inline-flex items-center rounded-xl border border-white/10 bg-white/5 text-sm text-white/85 hover:bg-white/10 hover:text-white",
         compactLabelOnMobile
           ? "h-10 w-10 justify-center px-0 sm:h-auto sm:w-auto sm:justify-start sm:px-3 sm:py-2"
-          : "gap-2 px-3 py-2"
+          : "gap-2 px-3 py-2",
       )}
     >
-      {/* icon slot: logo buttons fill width, normal icons stay square */}
       <span
         className={cn(
           "flex items-center justify-center",
-          isLogoOnly ? "h-6 w-full" : "h-5 w-5"
+          isLogoOnly ? "h-6 w-full" : "h-5 w-5",
         )}
       >
         {icon}
@@ -124,6 +151,6 @@ export default function ExternalLinkButton({
         ) : (
           <span className="min-w-0 truncate">{label}</span>
         ))}
-    </Link>
+    </a>
   );
 }
