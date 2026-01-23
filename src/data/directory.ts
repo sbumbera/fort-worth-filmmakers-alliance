@@ -31,6 +31,42 @@ export type MeetupRecurrence =
       dayOfWeek: number; // 0=Sun..6=Sat
       hour24: number;
       minute: number;
+    }
+  | {
+      kind: "monthlyOnDay";
+      dayOfMonth: number; // 1..31 (if invalid for a month, clamp to last day)
+      hour24: number;
+      minute: number;
+    }
+  | {
+      kind: "quarterlyOnDay";
+      months: number[]; // e.g., [0,3,6,9] for Jan/Apr/Jul/Oct. Must be 4 months.
+      dayOfMonth: number; // 1..31 (clamp to last day when needed)
+      hour24: number;
+      minute: number;
+    }
+  | {
+      kind: "quarterlyNthDow";
+      months: number[]; // e.g., [0,3,6,9] or any 4 fixed months
+      nth: number; // 1..5
+      dayOfWeek: number; // 0=Sun..6=Sat
+      hour24: number;
+      minute: number;
+    }
+  | {
+      kind: "annualOnDate";
+      month: number; // 0=Jan..11=Dec
+      dayOfMonth: number; // 1..31 (clamp to last day when needed)
+      hour24: number;
+      minute: number;
+    }
+  | {
+      kind: "annualNthDow";
+      month: number; // 0=Jan..11=Dec
+      nth: number; // 1..5
+      dayOfWeek: number; // 0=Sun..6=Sat
+      hour24: number;
+      minute: number;
     };
 
 export type DirectoryMeetup = {
@@ -48,6 +84,10 @@ export type DirectoryMeetup = {
 
   // Optional: override default duration used in calendar instances.
   durationMinutes?: number;
+
+  // Optional: Only for event links to show up on modal.
+  rsvpUrl?: string;
+  rsvpLabel?: string;
 };
 
 export type DirectoryItem = {
@@ -680,8 +720,34 @@ const SECTIONS_RAW: Array<
           },
           {
             kind: "instagram",
-            href: "https://www.instagram.com/dallasiff",
+            href: "https://www.instagram.com/wearediffdallas/",
             label: "Instagram",
+          },
+        ],
+        meetups: [
+          {
+            title: "DIFF Monthly Mixer",
+            recurrence: {
+              kind: "monthlyNthDow",
+              nth: 2, // every second
+              dayOfWeek: 3, // Wednesday (0=Sun..6=Sat)
+              hour24: 17, // 5:30 PM
+              minute: 30,
+            },
+            durationMinutes: 120, // 5:30–7:30 PM
+            locationName: "Commons Club inside Virgin Hotels Dallas",
+            locationCity: "Dallas, TX",
+            address: "1445 Turtle Creek Blvd, Dallas, TX 75207",
+            mapsQuery:
+              "Commons Club inside Virgin Hotels Dallas 1445 Turtle Creek Blvd Dallas TX 75207",
+            rsvpUrl:
+              "https://www.eventbrite.com/e/diff-december-mixer-at-virgin-hotels-dallas-tickets-1972823670706?aff=oddtdtcreator",
+            rsvpLabel: "RSVP on Eventbrite",
+            notes:
+              "Parking: Enjoy complimentary valet parking with purchase of food & beverage. Valet parking is available for $10. If you wish to self-park, there is a paid lot to the right of the hotel. Fees vary based on week day and parking duration.\n\n" +
+              "Food & Beverage: Happy hour specials will be available for purchase, including cocktails that steal the spotlight, lite bites to pair, and more!\n\n" +
+              "Giveaways: Registered guests are entered for giveaways!\n\n" +
+              "There is no charge to attend.",
           },
         ],
       },
@@ -2101,13 +2167,14 @@ const SECTIONS_RAW: Array<
         ],
         meetups: [
           {
-            title: "Weekly On-Camera Acting Classes",
+            title: "FW Actors Studio Class",
             recurrence: {
               kind: "weekly",
-              dayOfWeek: 1,
+              dayOfWeek: 1, // Monday
               hour24: 18,
               minute: 45,
             },
+            durationMinutes: 150, // ✅ 6:45 PM → 9:15 PM
             locationName: "Fort Worth Actors Studio",
             locationCity: "Fort Worth, TX",
             address: "2212 W Peter Smith St, Fort Worth, TX 76102",
@@ -2116,13 +2183,14 @@ const SECTIONS_RAW: Array<
               "Acting for the Camera classes every Monday and Tuesday night, typically 6:45-9:15 PM; verify current schedule before attending.",
           },
           {
-            title: "Weekly On-Camera Acting Classes",
+            title: "FW Actors Studio Class",
             recurrence: {
               kind: "weekly",
-              dayOfWeek: 2,
+              dayOfWeek: 2, // Tuesday
               hour24: 18,
               minute: 45,
             },
+            durationMinutes: 150, // ✅ 6:45 PM → 9:15 PM
             locationName: "Fort Worth Actors Studio",
             locationCity: "Fort Worth, TX",
             address: "2212 W Peter Smith St, Fort Worth, TX 76102",

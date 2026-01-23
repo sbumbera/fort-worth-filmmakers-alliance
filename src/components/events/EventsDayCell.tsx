@@ -29,10 +29,6 @@ export default function EventsDayCell({
   const indicatorRef = useRef<HTMLDivElement | null>(null);
   const [maxDots, setMaxDots] = useState<number>(4);
 
-  // These must match your Tailwind classes below:
-  // dot: h-1.5 w-1.5 => 6px
-  // gap-1 => 4px
-  // We compute: maxDots = floor((width + gap) / (dotSize + gap))
   const DOT_PX = 6;
   const GAP_PX = 4;
 
@@ -46,16 +42,12 @@ export default function EventsDayCell({
 
       const perDot = DOT_PX + GAP_PX;
       const dots = Math.max(1, Math.floor((width + GAP_PX) / perDot));
-
-      // Safety clamp so a huge screen does not create silly amounts of dots
       setMaxDots(Math.min(dots, 12));
     };
 
     compute();
-
     const ro = new ResizeObserver(() => compute());
     ro.observe(el);
-
     return () => ro.disconnect();
   }, []);
 
@@ -70,6 +62,8 @@ export default function EventsDayCell({
     "transition-colors",
     isOutside ? "opacity-45" : "opacity-100",
     isSelected ? "border-white/30 bg-white/5" : "border-white/10",
+    // Desktop: fixed height; prevent bleed
+    "sm:h-[140px] sm:overflow-hidden",
   ].join(" ");
 
   return (
@@ -80,11 +74,14 @@ export default function EventsDayCell({
         className={[
           "relative w-full text-left",
           "p-2 sm:p-2.5",
-          "min-h-[58px] sm:min-h-[110px]",
+          "min-h-[58px]",
+
+          // Desktop: fill cell + column layout + clip
+          "sm:h-full sm:overflow-hidden sm:flex sm:flex-col",
         ].join(" ")}
         aria-label={`Select ${dayKey}`}
       >
-        {/* Day number fixed top-left: mobile + desktop */}
+        {/* Day number */}
         <div
           className={[
             "absolute left-2 top-2",
@@ -95,14 +92,14 @@ export default function EventsDayCell({
           {day}
         </div>
 
-        {/* Today badge fixed top-right: desktop only */}
+        {/* Today badge (desktop only) */}
         {isToday ? (
           <div className="hidden sm:block absolute right-2 top-2 rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] text-white/70">
             Today
           </div>
         ) : null}
 
-        {/* Mobile indicators: dots until they do not fit, then a number */}
+        {/* Mobile indicators */}
         <div className="sm:hidden pt-6">
           <div ref={indicatorRef} className="w-full">
             <div className="flex w-full items-center justify-center">
@@ -126,19 +123,31 @@ export default function EventsDayCell({
           </div>
         </div>
 
-        {/* Desktop: show all event chips */}
-        <div className="mt-2 hidden space-y-1.5 sm:block pt-7">
-          {events.length === 0 ? (
-            <div className="text-[11px] text-white/35"> </div>
-          ) : (
-            events.map((e) => (
-              <EventChip
-                key={e.instanceId}
-                instance={e}
-                onClick={() => onSelectEvent(e)}
-              />
-            ))
-          )}
+        {/* Desktop events */}
+        <div className="hidden sm:flex flex-1 flex-col pt-7 min-h-0">
+          {/* ✅ This MUST be min-h-0 (above) for scrolling to work in a flex column */}
+
+          <div className="flex-1 min-h-0 overflow-y-auto pr-1 overscroll-contain [scrollbar-width:thin]">
+            {events.length === 0 ? (
+              <div className="text-[11px] text-white/35"> </div>
+            ) : (
+              <div className="space-y-1.5">
+                {events.map((e) => (
+                  <EventChip
+                    key={e.instanceId}
+                    instance={e}
+                    onClick={() => onSelectEvent(e)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {events.length > 2 ? (
+            <div className="mt-1 text-[10px] font-semibold text-white/40">
+              Scroll for more
+            </div>
+          ) : null}
         </div>
       </button>
     </div>

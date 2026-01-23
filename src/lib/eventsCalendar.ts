@@ -22,6 +22,10 @@ export type EventInstance = {
 
   // Notes for modal and Add-to-Calendar
   notes?: string;
+
+  // ✅ Event-specific link (modal-only)
+  rsvpUrl?: string;
+  rsvpLabel?: string;
 };
 
 function pad2(n: number) {
@@ -79,14 +83,99 @@ export function buildMonthDays(month: Date) {
   return days;
 }
 
+function daysInMonth(year: number, month0: number) {
+  return new Date(year, month0 + 1, 0).getDate();
+}
+
+function clampDayOfMonth(year: number, month0: number, dayOfMonth: number) {
+  const dim = daysInMonth(year, month0);
+  const d = Math.max(1, Math.floor(dayOfMonth || 1));
+  return Math.min(d, dim);
+}
+
 function isNthDowOfMonth(date: Date, nth: number, weekday: number) {
   if (date.getDay() !== weekday) return false;
 
-  // Find occurrence index within that month:
-  // 1st/2nd/3rd/4th/5th <weekday>
+  // 1st/2nd/3rd/4th/5th <weekday> in this month
   const dayOfMonth = date.getDate();
   const occurrence = Math.floor((dayOfMonth - 1) / 7) + 1;
   return occurrence === nth;
+}
+
+function includesMonth(months: number[] | undefined, month0: number) {
+  if (!months || months.length === 0) return false;
+  return months.includes(month0);
+}
+
+function matchesRecurrenceOnDate(ev: RecurringEvent, cur: Date): boolean {
+  const month0 = cur.getMonth();
+  const weekday0 = cur.getDay();
+
+  switch (ev.kind) {
+    case "weekly": {
+      if (typeof ev.weekday !== "number") return false;
+      return weekday0 === ev.weekday;
+    }
+
+    case "monthlyNthDow": {
+      const nth = ev.nth ?? 1;
+      if (typeof ev.weekday !== "number") return false;
+      if (weekday0 !== ev.weekday) return false;
+      return isNthDowOfMonth(cur, nth, ev.weekday);
+    }
+
+    case "monthlyOnDay": {
+      const day = clampDayOfMonth(
+        cur.getFullYear(),
+        month0,
+        ev.dayOfMonth ?? 1,
+      );
+      return cur.getDate() === day;
+    }
+
+    case "quarterlyOnDay": {
+      if (!includesMonth(ev.months, month0)) return false;
+      const day = clampDayOfMonth(
+        cur.getFullYear(),
+        month0,
+        ev.dayOfMonth ?? 1,
+      );
+      return cur.getDate() === day;
+    }
+
+    case "quarterlyNthDow": {
+      if (!includesMonth(ev.months, month0)) return false;
+      const nth = ev.nth ?? 1;
+      if (typeof ev.weekday !== "number") return false;
+      if (weekday0 !== ev.weekday) return false;
+      return isNthDowOfMonth(cur, nth, ev.weekday);
+    }
+
+    case "annualOnDate": {
+      if (typeof ev.month !== "number") return false;
+      if (month0 !== ev.month) return false;
+      const day = clampDayOfMonth(
+        cur.getFullYear(),
+        month0,
+        ev.dayOfMonth ?? 1,
+      );
+      return cur.getDate() === day;
+    }
+
+    case "annualNthDow": {
+      if (typeof ev.month !== "number") return false;
+      if (month0 !== ev.month) return false;
+      const nth = ev.nth ?? 1;
+      if (typeof ev.weekday !== "number") return false;
+      if (weekday0 !== ev.weekday) return false;
+      return isNthDowOfMonth(cur, nth, ev.weekday);
+    }
+
+    default: {
+      const _exhaustive: never = ev.kind;
+      return _exhaustive;
+    }
+  }
 }
 
 export function buildEventInstancesForMonth(
@@ -100,16 +189,8 @@ export function buildEventInstancesForMonth(
   const cur = new Date(start);
 
   while (cur <= end) {
-    const weekday = cur.getDay(); // 0-6
-
     for (const ev of recurring) {
-      if (ev.weekday !== weekday) continue;
-
-      // Monthly events only occur on the nth weekday of their month.
-      if (ev.kind === "monthlyNthDow") {
-        const nth = ev.nth ?? 1;
-        if (!isNthDowOfMonth(cur, nth, weekday)) continue;
-      }
+      if (!matchesRecurrenceOnDate(ev, cur)) continue;
 
       const { h, m } = parseTimeHHMM(ev.startTime);
       const startDt = new Date(
@@ -138,6 +219,10 @@ export function buildEventInstancesForMonth(
         venueAddress: ev.venueAddress,
 
         notes: ev.notes,
+
+        // ✅ pass through for EventModal
+        rsvpUrl: ev.rsvpUrl,
+        rsvpLabel: ev.rsvpLabel,
       });
     }
 

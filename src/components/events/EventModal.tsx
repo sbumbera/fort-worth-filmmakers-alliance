@@ -70,6 +70,21 @@ export default function EventModal({
     });
   }, [instance, org]);
 
+  // ✅ Build link list: organizer links + optional RSVP link (modal-only)
+  const modalLinks: DirectoryLink[] = useMemo(() => {
+    const base = org?.links ?? [];
+    if (!instance?.rsvpUrl) return base;
+
+    return [
+      ...base,
+      {
+        kind: "website",
+        href: instance.rsvpUrl,
+        label: instance.rsvpLabel || "RSVP",
+      },
+    ];
+  }, [org?.links, instance?.rsvpUrl, instance?.rsvpLabel]);
+
   if (!open || !instance) return null;
 
   const venueLabel = instance.isTBA
@@ -160,9 +175,9 @@ export default function EventModal({
                 </div>
               )}
 
-              {org?.links?.length ? (
+              {modalLinks.length ? (
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {org.links.map((l) => (
+                  {modalLinks.map((l) => (
                     <a
                       key={`${l.kind}-${l.href}`}
                       href={l.href}

@@ -3,6 +3,10 @@
 import type { DirectoryItem, DirectoryMeetup } from "@/data/directory";
 import { flattenDirectoryItems } from "@/data/directory";
 
+function assertNever(x: never): never {
+  throw new Error("Unhandled recurrence kind");
+}
+
 export type RecurringEvent = {
   id: string; // stable id for recurrence rule
   orgId: string; // directory item id (slugified)
@@ -10,18 +14,33 @@ export type RecurringEvent = {
 
   label: string;
 
-  kind: "weekly" | "monthlyNthDow";
+  kind:
+    | "weekly"
+    | "monthlyNthDow"
+    | "monthlyOnDay"
+    | "quarterlyNthDow"
+    | "quarterlyOnDay"
+    | "annualNthDow"
+    | "annualOnDate";
 
-  // 0=Sun..6=Sat
-  weekday: number;
+  // Shared time fields
+  startTime: string; // "HH:MM" 24h
+  durationMinutes: number;
 
-  // Only used for monthlyNthDow
+  // Weekly / Nth-DOW patterns
+  weekday?: number; // 0=Sun..6=Sat
+
+  // Used for monthlyNthDow / quarterlyNthDow / annualNthDow
   nth?: number;
 
-  // "HH:MM" 24h
-  startTime: string;
+  // Used for monthlyOnDay / quarterlyOnDay / annualOnDate
+  dayOfMonth?: number;
 
-  durationMinutes: number;
+  // Used for annual patterns
+  month?: number; // 0=Jan..11=Dec
+
+  // Used for quarterly patterns
+  months?: number[]; // 0=Jan..11=Dec; typically length 4
 
   // Venue and UX fields
   isTBA?: boolean;
@@ -30,6 +49,10 @@ export type RecurringEvent = {
 
   // Extra content for modal and Add-to-Calendar notes
   notes?: string;
+
+  // Optional event-specific link shown only in EventModal (not directory listing)
+  rsvpUrl?: string;
+  rsvpLabel?: string;
 };
 
 const DEFAULT_DURATION_MINUTES = 120;
@@ -49,9 +72,6 @@ function meetupToRecurring(
 ): RecurringEvent {
   const rec = meetup.recurrence;
 
-  const kind = rec.kind;
-  const weekday = rec.dayOfWeek;
-
   const startTime = toHHMM(rec.hour24, rec.minute);
 
   const venueName = meetup.isTBA ? undefined : meetup.locationName;
@@ -59,15 +79,11 @@ function meetupToRecurring(
     ? undefined
     : meetup.address || meetup.locationCity || undefined;
 
-  return {
+  const base = {
     id: `${org.id}-meetup-${index}`,
     orgId: org.id,
     orgName: org.name,
     label: meetup.title || org.name,
-
-    kind,
-    weekday,
-    nth: kind === "monthlyNthDow" ? rec.nth : undefined,
 
     startTime,
     durationMinutes: meetup.durationMinutes ?? DEFAULT_DURATION_MINUTES,
@@ -77,7 +93,72 @@ function meetupToRecurring(
     venueAddress,
 
     notes: meetup.notes,
+
+    rsvpUrl: meetup.rsvpUrl,
+    rsvpLabel: meetup.rsvpLabel,
   };
+
+  switch (rec.kind) {
+    case "weekly":
+      return {
+        ...base,
+        kind: "weekly",
+        weekday: rec.dayOfWeek,
+      };
+
+    case "monthlyNthDow":
+      return {
+        ...base,
+        kind: "monthlyNthDow",
+        weekday: rec.dayOfWeek,
+        nth: rec.nth,
+      };
+
+    case "monthlyOnDay":
+      return {
+        ...base,
+        kind: "monthlyOnDay",
+        dayOfMonth: rec.dayOfMonth,
+      };
+
+    case "quarterlyOnDay":
+      return {
+        ...base,
+        kind: "quarterlyOnDay",
+        months: rec.months,
+        dayOfMonth: rec.dayOfMonth,
+      };
+
+    case "quarterlyNthDow":
+      return {
+        ...base,
+        kind: "quarterlyNthDow",
+        months: rec.months,
+        weekday: rec.dayOfWeek,
+        nth: rec.nth,
+      };
+
+    case "annualOnDate":
+      return {
+        ...base,
+        kind: "annualOnDate",
+        month: rec.month,
+        dayOfMonth: rec.dayOfMonth,
+      };
+
+    case "annualNthDow":
+      return {
+        ...base,
+        kind: "annualNthDow",
+        month: rec.month,
+        weekday: rec.dayOfWeek,
+        nth: rec.nth,
+      };
+
+    default:
+      // ✅ Compile-time exhaustiveness check
+      return assertNever(rec);
+  }
 }
 
 export function getRecurringEventsFromDirectory(): RecurringEvent[] {
