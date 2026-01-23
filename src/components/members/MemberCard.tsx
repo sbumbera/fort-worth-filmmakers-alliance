@@ -1,4 +1,3 @@
-// src/components/members/MemberCard.tsx
 import Image from "next/image";
 import type { Member } from "@/data/members";
 import ExternalLinkButton from "@/components/members/ExternalLinkButton";

@@ -1,4 +1,3 @@
-// src/components/members/ExternalLinkButton.tsx
 import type { MemberLink, LinkKind } from "@/data/members";
 import {
   InstagramIcon,
@@ -87,6 +86,7 @@ export default function ExternalLinkButton({
   const isPhone = kind === "phone";
   const isExternal = !(isEmail || isPhone);
 
+  const isImdb = kind === "imdb";
   const isLogoOnly = kind === "actorbay" || kind === "imdb";
 
   const icon =
@@ -130,16 +130,24 @@ export default function ExternalLinkButton({
       aria-label={isLogoOnly ? label : undefined}
       title={isLogoOnly ? label : undefined}
       className={cn(
-        "inline-flex items-center rounded-xl border border-white/10 bg-white/5 text-sm text-white/85 hover:bg-white/10 hover:text-white",
+        "inline-flex items-center rounded-xl border border-white/10 text-sm hover:text-white",
         compactLabelOnMobile
           ? "h-10 w-10 justify-center px-0 sm:h-auto sm:w-auto sm:justify-start sm:px-3 sm:py-2"
-          : "gap-2 px-3 py-2",
+          : "h-10 gap-2 px-3 py-2",
+        !isImdb && "bg-white/5 text-white/85 hover:bg-white/10",
+        isImdb &&
+          "bg-[#F5C518] text-black hover:bg-[#e6b916] border-transparent px-2",
       )}
     >
       <span
         className={cn(
           "flex items-center justify-center",
-          isLogoOnly ? "h-6 w-full" : "h-5 w-5",
+          // IMDb fills the interior height; others keep the original sizing.
+          isImdb
+            ? "relative h-full w-full"
+            : isLogoOnly
+              ? "h-6 w-full"
+              : "h-5 w-5",
         )}
       >
         {icon}
@@ -149,7 +157,14 @@ export default function ExternalLinkButton({
         (compactLabelOnMobile ? (
           <span className="ml-2 hidden sm:inline">{label}</span>
         ) : (
-          <span className="min-w-0 truncate">{label}</span>
+          <span
+            className={cn(
+              "min-w-0 truncate",
+              isPhone && "sm:text-xs md:text-[11px] lg:text-xs",
+            )}
+          >
+            {label}
+          </span>
         ))}
     </a>
   );

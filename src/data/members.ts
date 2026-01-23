@@ -45,6 +45,11 @@ export const MEMBERS: Member[] = [
     },
     links: [
       {
+        kind: "imdb",
+        href: "https://www.imdb.com/name/nm17860284/",
+        label: "IMDB",
+      },
+      {
         kind: "instagram",
         href: "https://www.instagram.com/jesseleebumbera/",
         label: "Instagram",
@@ -57,11 +62,6 @@ export const MEMBERS: Member[] = [
         kind: "backstage",
         href: "https://www.backstage.com/u/steven-bumbera/",
         label: "Backstage",
-      },
-      {
-        kind: "imdb",
-        href: "https://www.imdb.com/name/nm17860284/",
-        label: "IMDB",
       },
       {
         kind: "website",
@@ -98,14 +98,14 @@ export const MEMBERS: Member[] = [
     },
     links: [
       {
-        kind: "instagram",
-        href: "https://www.instagram.com/marimarisdiary/",
-        label: "Instagram",
-      },
-      {
         kind: "imdb",
         href: "https://m.imdb.com/name/nm6210165/",
         label: "IMDB",
+      },
+      {
+        kind: "instagram",
+        href: "https://www.instagram.com/marimarisdiary/",
+        label: "Instagram",
       },
     ],
   },
@@ -190,14 +190,14 @@ export const MEMBERS: Member[] = [
     },
     links: [
       {
-        kind: "instagram",
-        href: "https://www.instagram.com/nathanaelpaine_dp/",
-        label: "Instagram",
-      },
-      {
         kind: "imdb",
         href: "https://www.imdb.com/name/nm6153669/",
         label: "IMDB",
+      },
+      {
+        kind: "instagram",
+        href: "https://www.instagram.com/nathanaelpaine_dp/",
+        label: "Instagram",
       },
     ],
   },
@@ -212,14 +212,14 @@ export const MEMBERS: Member[] = [
     },
     links: [
       {
-        kind: "backstage",
-        href: "https://www.backstage.com/tal/thomas-collins-1",
-        label: "Backstage",
-      },
-      {
         kind: "imdb",
         href: "https://www.imdb.com/name/nm17860288/",
         label: "IMDB",
+      },
+      {
+        kind: "backstage",
+        href: "https://www.backstage.com/tal/thomas-collins-1",
+        label: "Backstage",
       },
       {
         kind: "website",
@@ -239,15 +239,16 @@ export const MEMBERS: Member[] = [
     },
     links: [
       {
-        kind: "email",
-        href: "Alexama017@gmail.com ",
-        label: "Email",
-      },
-      {
         kind: "phone",
         href: "tel:+14696627968",
         label: "(469) 662-7968",
       },
+      {
+        kind: "email",
+        href: "Alexama017@gmail.com ",
+        label: "Email",
+      },
+
       {
         kind: "instagram",
         href: "https://www.instagram.com/chanclaphobia/",
