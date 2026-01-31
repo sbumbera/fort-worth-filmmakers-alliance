@@ -1,6 +1,7 @@
 // src/lib/eventsCalendar.ts
 
 import type { RecurringEvent } from "@/lib/recurringFromDirectory";
+import { fromZonedTime } from "date-fns-tz";
 
 export type EventInstance = {
   instanceId: string; // `${event.id}-${YYYY-MM-DD}`
@@ -28,8 +29,26 @@ export type EventInstance = {
   rsvpLabel?: string;
 };
 
+const TZ = "America/Chicago";
+
 function pad2(n: number) {
   return String(n).padStart(2, "0");
+}
+
+/**
+ * Build a Date that represents a wall-clock time in America/Chicago,
+ * regardless of where the code runs (server UTC, client Central, etc).
+ */
+function chicagoLocalToDate(
+  year: number,
+  month0: number, // 0-11
+  day: number, // 1-31
+  hour: number, // 0-23
+  minute: number, // 0-59
+) {
+  const isoLocal = `${year}-${pad2(month0 + 1)}-${pad2(day)}T${pad2(hour)}:${pad2(minute)}:00`;
+  // Convert Chicago wall-clock time -> actual UTC instant Date
+  return fromZonedTime(isoLocal, TZ);
 }
 
 export function ymd(d: Date) {
@@ -193,15 +212,16 @@ export function buildEventInstancesForMonth(
       if (!matchesRecurrenceOnDate(ev, cur)) continue;
 
       const { h, m } = parseTimeHHMM(ev.startTime);
-      const startDt = new Date(
+
+      // ✅ Timezone-safe: treat startTime as Chicago wall-clock time
+      const startDt = chicagoLocalToDate(
         cur.getFullYear(),
         cur.getMonth(),
         cur.getDate(),
         h,
         m,
-        0,
-        0,
       );
+
       const endDt = addMinutes(startDt, ev.durationMinutes);
 
       instances.push({
@@ -220,7 +240,6 @@ export function buildEventInstancesForMonth(
 
         notes: ev.notes,
 
-        // ✅ pass through for EventModal
         rsvpUrl: ev.rsvpUrl,
         rsvpLabel: ev.rsvpLabel,
       });
