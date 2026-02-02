@@ -16,6 +16,17 @@ export type DirectoryLink = {
   kind: LinkKind;
   href: string;
   label?: string;
+
+  /**
+   * Optional placement control:
+   * - "primary": shown in the top-right slot (used mainly for the main website)
+   * - "footer": forced into the bottom button group
+   *
+   * If omitted, existing behavior applies:
+   * - the first website becomes primary
+   * - all other links go to footer
+   */
+  placement?: "primary" | "footer";
 };
 
 export type MeetupRecurrence =
@@ -1062,7 +1073,7 @@ const SECTIONS_RAW: Array<
   // ==========================================================================
   {
     id: "studios",
-    title: "Studios and Soundstages",
+    title: "Studios, Soundstages, Production Companies",
     subtitle:
       "From self-serve rental listings to major studio campuses shaping the region’s production capacity.",
     items: [
@@ -1359,6 +1370,49 @@ const SECTIONS_RAW: Array<
             kind: "instagram",
             href: "https://www.instagram.com/vfxstudiosga/",
             label: "Instagram",
+          },
+        ],
+      },
+      {
+        name: "Drip Content Media House",
+        location: "Arlington TX",
+        description:
+          "Drip Content Media House is a creative production company specializing in branded video, social content, and media strategy for businesses and creators. They produce engaging, high-quality content across platforms including web, social, and streaming outlets.",
+        links: [
+          {
+            kind: "website",
+            href: "https://dripcontentmediahouse.com/",
+            label: "Website",
+          },
+          {
+            kind: "facebook",
+            href: "https://www.facebook.com/dripcontentmediahouse/",
+            label: "Facebook",
+          },
+          {
+            kind: "instagram",
+            href: "https://www.instagram.com/dripcontentmediahouse/",
+            label: "Instagram",
+          },
+          {
+            kind: "youtube",
+            href: "https://www.youtube.com/@dripcontentmediahouse",
+            label: "YouTube",
+          },
+          {
+            kind: "phone",
+            href: "tel:+18172352699",
+            label: "(817) 235-2699",
+          },
+          {
+            kind: "phone",
+            href: "tel:+16822222435",
+            label: "(682) 222-2435",
+          },
+          {
+            kind: "email",
+            href: "mailto:info@dripcontentmedia.com",
+            label: "Email",
           },
         ],
       },
@@ -2164,6 +2218,11 @@ const SECTIONS_RAW: Array<
           "Fort Worth Actors Studio offers on-camera acting classes for teens and adults with recurring Monday and Tuesday night sessions (Acting for the Camera, 6:45-9:15 PM), focusing on cold reading, audition skills, scene study, and improv to help students grow as confident performers in film and TV.",
         links: [
           { kind: "website", href: "https://fwactors.com", label: "Website" },
+          {
+            kind: "instagram",
+            href: "https://www.instagram.com/fortworthactorsstudio/",
+            label: "Instagram",
+          },
         ],
         meetups: [
           {
@@ -2365,6 +2424,68 @@ const SECTIONS_RAW: Array<
             kind: "instagram",
             href: "https://www.instagram.com/shinecinefw/",
             label: "Instagram",
+          },
+        ],
+      },
+      {
+        name: "Aurora Technocrane (Aurora Digital Cinema)",
+        location: "Dallas, TX",
+        description:
+          "Professional Technocrane rentals and operator services for film, commercial, and broadcast productions in North Texas. Their telescoping crane systems enable smooth, precise cinematic camera movement for complex on-set shots.",
+        links: [
+          {
+            kind: "website",
+            href: "https://www.auroradigitalcinema.com/technocrane",
+            label: "Website",
+          },
+          {
+            kind: "instagram",
+            href: "https://www.instagram.com/aurora_technocrane/",
+            label: "Instagram",
+          },
+          {
+            kind: "phone",
+            href: "tel:+18177970317",
+            label: "(817) 797-0317",
+          },
+          {
+            kind: "email",
+            href: "mailto:Bhester2000@gmail.com",
+            label: "Email",
+          },
+        ],
+      },
+      {
+        name: "AB Squared Rentals",
+        location: "Dallas, TX",
+        description:
+          "AB Squared Rentals offers a wide range of production supply rentals including vehicles, walkies, traffic gear, tents, tables, and on-set production equipment for film and media projects. They serve the Dallas production community with dependable gear and flexible rental options. :contentReference[oaicite:0]{index=0}",
+        links: [
+          {
+            kind: "website",
+            href: "https://www.absquaredrentals.com/",
+            label: "Website",
+            placement: "primary",
+          },
+          {
+            kind: "website",
+            href: "https://abf22b-67.myshopify.com/",
+            label: "Merch",
+          },
+          {
+            kind: "instagram",
+            href: "https://www.instagram.com/absquaredrentals/",
+            label: "Instagram",
+          },
+          {
+            kind: "phone",
+            href: "tel:+16304848016",
+            label: "(630) 484-8016",
+          },
+          {
+            kind: "email",
+            href: "mailto:rentals@absquaredrentals.com",
+            label: "Email",
           },
         ],
       },

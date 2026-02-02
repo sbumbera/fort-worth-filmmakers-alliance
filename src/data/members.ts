@@ -288,4 +288,53 @@ export const MEMBERS: Member[] = [
       },
     ],
   },
+  {
+    name: "Rachel Peck",
+    location: "Dallas",
+    roles: ["Makeup Artist", "Hair and Makeup Artist", "SFX Makeup Artist"],
+    bio: "Rachel Peck is a professional hair and makeup artist specializing in on-camera work for film, runway, and special effects. Her focus is creating camera-ready hair and makeup that translate seamlessly under studio lighting, movement, and high-resolution capture. Based in DFW, she works closely with directors, photographers, and production teams to support visual storytelling through intentional, refined artistry.",
+    image: {
+      src: "/members/r-peck.jpg",
+      alt: "Rachel Peck",
+    },
+    links: [
+      {
+        kind: "instagram",
+        href: "https://www.instagram.com/makeupxrachel",
+        label: "Instagram",
+      },
+    ],
+  },
+  {
+    name: 'Michelle "Vee" McGehee',
+    location: "Fort Worth",
+    roles: [
+      "Makeup Artist",
+      "Hair and Makeup Artist",
+      "SFX Makeup Artist",
+      "Key Makeup Artist",
+    ],
+    bio: 'Michelle "Vee" McGehee is a seasoned hair, makeup, and makeup effects professional with over 20 years of experience in production.',
+    image: {
+      src: "/members/m-mcgehee3.jpg",
+      alt: 'Michelle "Vee" McGehee',
+    },
+    links: [
+      {
+        kind: "website",
+        href: "https://www.makeupartbyvivienne.com",
+        label: "Website",
+      },
+      {
+        kind: "email",
+        href: "mailto:Vforvermuth@gmail.com",
+        label: "Email",
+      },
+      {
+        kind: "phone",
+        href: "tel:+14692680213",
+        label: "(469) 268-0213",
+      },
+    ],
+  },
 ];

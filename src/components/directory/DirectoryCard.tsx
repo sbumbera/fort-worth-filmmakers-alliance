@@ -1,14 +1,27 @@
 // src/components/directory/DirectoryCard.tsx
-import type { DirectoryItem } from "@/data/directory";
+import type { DirectoryItem, DirectoryLink } from "@/data/directory";
 import DirectoryLinkButton from "@/components/directory/DirectoryLinkButton";
 
+function getPrimaryLink(links: DirectoryLink[]) {
+  // Preferred: explicitly marked primary website
+  const explicitPrimary = links.find(
+    (l) => l.kind === "website" && l.placement === "primary",
+  );
+  if (explicitPrimary) return explicitPrimary;
+
+  // Backwards compatible default: first website link
+  return links.find((l) => l.kind === "website");
+}
+
 export default function DirectoryCard({ item }: { item: DirectoryItem }) {
-  const website = item.links.find((l) => l.kind === "website");
-  const socials = item.links.filter((l) => l.kind !== "website");
+  const primary = getPrimaryLink(item.links);
+
+  // Everything except the primary link goes to the footer.
+  // This naturally allows "extra websites" to be displayed in footer.
+  const footerLinks = item.links.filter((l) => l !== primary);
 
   return (
     <div className="h-full rounded-3xl border border-white/10 bg-black/25 p-5">
-      {/* Make the card a column so we can pin buttons to the bottom */}
       <div className="flex h-full flex-col">
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
@@ -23,9 +36,9 @@ export default function DirectoryCard({ item }: { item: DirectoryItem }) {
             ) : null}
           </div>
 
-          {website ? (
+          {primary ? (
             <div className="shrink-0">
-              <DirectoryLinkButton link={website} />
+              <DirectoryLinkButton link={primary} />
             </div>
           ) : null}
         </div>
@@ -33,11 +46,11 @@ export default function DirectoryCard({ item }: { item: DirectoryItem }) {
         {/* Body */}
         <div className="mt-3 text-sm text-white/75">{item.description}</div>
 
-        {/* Footer: pinned to bottom */}
-        {socials.length > 0 ? (
+        {/* Footer */}
+        {footerLinks.length > 0 ? (
           <div className="mt-auto pt-4">
             <div className="flex flex-wrap gap-2">
-              {socials.map((l) => (
+              {footerLinks.map((l) => (
                 <DirectoryLinkButton
                   key={`${item.name}-${l.kind}-${l.href}`}
                   link={l}

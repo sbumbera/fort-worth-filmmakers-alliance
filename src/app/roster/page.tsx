@@ -93,6 +93,7 @@ const ROLE_GROUPS: RoleGroup[] = [
   {
     department: "Hair and Makeup",
     roles: [
+      "Hair and Makeup Artist",
       "Hair Stylist",
       "Key Hair Stylist",
       "Key Makeup Artist",
@@ -194,7 +195,7 @@ const SORTED_GROUPS = ROLE_GROUPS.map((g) => ({
 })).sort((a, b) => a.department.localeCompare(b.department));
 
 const DEPT_TO_ROLES = new Map<string, string[]>(
-  SORTED_GROUPS.map((g) => [g.department, g.roles])
+  SORTED_GROUPS.map((g) => [g.department, g.roles]),
 );
 
 /**
@@ -247,11 +248,11 @@ export default function MembersPage() {
         const memberRoles: string[] = Array.isArray(m.roles)
           ? m.roles
           : m.role
-          ? [m.role]
-          : [];
+            ? [m.role]
+            : [];
 
         return memberRoles.some((mr) =>
-          deptRoleSet.has(normalizeRoleLabel(mr))
+          deptRoleSet.has(normalizeRoleLabel(mr)),
         );
       });
     }
@@ -266,8 +267,8 @@ export default function MembersPage() {
       const memberRoles: string[] = Array.isArray(m.roles)
         ? m.roles
         : m.role
-        ? [m.role]
-        : [];
+          ? [m.role]
+          : [];
 
       return memberRoles.some((mr) => normalizeRoleLabel(mr) === selected);
     });
@@ -279,7 +280,7 @@ export default function MembersPage() {
 
   const visible = useMemo(
     () => roleFiltered.slice(0, visibleCount),
-    [roleFiltered, visibleCount]
+    [roleFiltered, visibleCount],
   );
 
   const canLoadMore = visibleCount < roleFiltered.length;
@@ -331,7 +332,7 @@ export default function MembersPage() {
               <LoadMoreButton
                 onClick={() =>
                   setVisibleCount((v) =>
-                    Math.min(roleFiltered.length, v + PAGE_SIZE)
+                    Math.min(roleFiltered.length, v + PAGE_SIZE),
                   )
                 }
               />
