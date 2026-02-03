@@ -337,4 +337,46 @@ export const MEMBERS: Member[] = [
       },
     ],
   },
+  {
+    name: "Paul Michael",
+    location: "Granbury, TX",
+    roles: [
+      "Cinematographer",
+      "Camera Operator",
+      "1st AC",
+      "Gaffer",
+      "Grip",
+      "Audio Engineer",
+      "Drone Pilot",
+      "Video Editor",
+      "Photographer",
+    ],
+    bio: "Paul Michael is a cinematographer and multi-disciplinary camera professional with over 20 years of experience in audio and video production. He specializes in visual storytelling through thoughtful lighting, lens selection, and camera movement. While his primary focus is cinematography, he also works across weddings, live events, aerial work, music videos, corporate content, and broadcast projects.",
+    image: {
+      src: "/members/p-michael.jpg",
+      alt: "Paul Michael",
+    },
+    links: [
+      {
+        kind: "website",
+        href: "https://www.paulmichaelphotography.com/",
+        label: "Website",
+      },
+      {
+        kind: "instagram",
+        href: "https://www.instagram.com/paulmichaelphoto/",
+        label: "Instagram",
+      },
+      {
+        kind: "phone",
+        href: "tel:+19725599682",
+        label: "(972) 559-9682",
+      },
+      {
+        kind: "email",
+        href: "mailto:info@PaulMichaelPhotography.com",
+        label: "Email",
+      },
+    ],
+  },
 ];

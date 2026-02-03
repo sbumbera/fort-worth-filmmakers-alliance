@@ -1416,6 +1416,55 @@ const SECTIONS_RAW: Array<
           },
         ],
       },
+      {
+        name: "Tame Rabbit",
+        location: "Granbury, TX",
+        description:
+          "Tame Rabbit is a full-service video production company creating narrative films, commercials, corporate videos, and music videos. They combine modern production technology with story-driven visual filmmaking across multiple formats and platforms.",
+        links: [
+          {
+            kind: "website",
+            href: "https://www.tamerabbit.net/",
+            label: "Website",
+            placement: "primary",
+          },
+          {
+            kind: "website",
+            href: "https://tamerabbit.printful.me/",
+            label: "Merch",
+          },
+          {
+            kind: "facebook",
+            href: "https://www.facebook.com/tamerabbitpro",
+            label: "Facebook",
+          },
+          {
+            kind: "instagram",
+            href: "https://www.instagram.com/tamerabbitpro",
+            label: "Instagram",
+          },
+          {
+            kind: "linkedin",
+            href: "https://www.linkedin.com/company/tamerabbit/",
+            label: "LinkedIn",
+          },
+          {
+            kind: "youtube",
+            href: "https://www.youtube.com/@tamerabbitpro",
+            label: "YouTube",
+          },
+          {
+            kind: "phone",
+            href: "tel:+18175780815",
+            label: "(817) 578-0815",
+          },
+          {
+            kind: "email",
+            href: "mailto:contact@tamerabbit.net",
+            label: "Email",
+          },
+        ],
+      },
     ],
   },
 
