@@ -647,7 +647,7 @@ const SECTIONS_RAW: Array<
       },
       {
         name: "Rack Focus",
-        location: "Dallas–Fort Worth",
+        location: "Dallas",
         description:
           "Three-month indie short-film race culminating in a public screening where completed shorts premiere and awards are presented.",
         links: [
@@ -1133,7 +1133,7 @@ const SECTIONS_RAW: Array<
       },
       {
         name: "101 Studios",
-        location: "North Texas presence",
+        location: "Alliance",
         description:
           "Production company behind major series and a key player in expanding large-scale production activity and infrastructure in North Texas.",
         links: [
@@ -1374,8 +1374,8 @@ const SECTIONS_RAW: Array<
         ],
       },
       {
-        name: "Drip Content Media House",
-        location: "Arlington TX",
+        name: "The Drip Content Media House",
+        location: "Arlington",
         description:
           "Drip Content Media House is a creative production company specializing in branded video, social content, and media strategy for businesses and creators. They produce engaging, high-quality content across platforms including web, social, and streaming outlets.",
         links: [
@@ -1401,13 +1401,13 @@ const SECTIONS_RAW: Array<
           },
           {
             kind: "phone",
-            href: "tel:+18172352699",
-            label: "(817) 235-2699",
+            href: "tel:+16822222435",
+            label: "(682) 222-2435",
           },
           {
             kind: "phone",
-            href: "tel:+16822222435",
-            label: "(682) 222-2435",
+            href: "tel:+18172352699",
+            label: "(817) 235-2699",
           },
           {
             kind: "email",
@@ -1418,7 +1418,7 @@ const SECTIONS_RAW: Array<
       },
       {
         name: "Tame Rabbit",
-        location: "Granbury, TX",
+        location: "Granbury",
         description:
           "Tame Rabbit is a full-service video production company creating narrative films, commercials, corporate videos, and music videos. They combine modern production technology with story-driven visual filmmaking across multiple formats and platforms.",
         links: [
@@ -1492,7 +1492,7 @@ const SECTIONS_RAW: Array<
       },
       {
         name: "Katz Kasting",
-        location: "Dallas–Fort Worth",
+        location: "Dallas",
         description:
           "Casting office known for background and principal casting across commercials, TV, film, and events, often posting local calls.",
         links: [
@@ -1635,7 +1635,7 @@ const SECTIONS_RAW: Array<
       },
       {
         name: "Grogan Management (Damaris Grogan)",
-        location: "Dallas–Fort Worth",
+        location: "Dallas",
         description:
           "A boutique talent management company led by Damaris Grogan, representing actors and creatives for film, television, and commercial work with a focus on career development and strategic placement.",
         links: [
@@ -1688,7 +1688,7 @@ const SECTIONS_RAW: Array<
       },
       {
         name: "IATSE Local 484",
-        location: "Texas",
+        location: "Texas (Statewide)",
         description:
           "Crew technicians union representing below-the-line roles and providing training and support for film and TV productions.",
         links: [
@@ -1706,7 +1706,7 @@ const SECTIONS_RAW: Array<
       },
       {
         name: "Teamsters Local 745",
-        location: "Dallas–Fort Worth",
+        location: "Dallas",
         description:
           "Teamsters local covering transportation roles and support personnel crucial for moving gear, vehicles, and crew safely on productions.",
         links: [
@@ -2098,7 +2098,7 @@ const SECTIONS_RAW: Array<
       },
       {
         name: "Onset",
-        location: "Dallas-Fort Worth",
+        location: "National",
         description:
           "A professional casting and production management platform designed to streamline casting breakdowns, submissions, scheduling, and communication between casting directors, producers, and talent.",
         links: [
@@ -2478,7 +2478,7 @@ const SECTIONS_RAW: Array<
       },
       {
         name: "Aurora Technocrane (Aurora Digital Cinema)",
-        location: "Dallas, TX",
+        location: "Dallas",
         description:
           "Professional Technocrane rentals and operator services for film, commercial, and broadcast productions in North Texas. Their telescoping crane systems enable smooth, precise cinematic camera movement for complex on-set shots.",
         links: [
@@ -2506,9 +2506,9 @@ const SECTIONS_RAW: Array<
       },
       {
         name: "AB Squared Rentals",
-        location: "Dallas, TX",
+        location: "Dallas",
         description:
-          "AB Squared Rentals offers a wide range of production supply rentals including vehicles, walkies, traffic gear, tents, tables, and on-set production equipment for film and media projects. They serve the Dallas production community with dependable gear and flexible rental options. :contentReference[oaicite:0]{index=0}",
+          "Offers a wide range of production supply rentals including vehicles, walkies, traffic gear, tents, tables, and on-set production equipment for film and media projects. They serve the Dallas production community with dependable gear and flexible rental options.",
         links: [
           {
             kind: "website",
@@ -2534,6 +2534,57 @@ const SECTIONS_RAW: Array<
           {
             kind: "email",
             href: "mailto:rentals@absquaredrentals.com",
+            label: "Email",
+          },
+        ],
+      },
+      {
+        name: "Moondrops N Props",
+        location: "Dallas",
+        description:
+          "Film-friendly theatrical backdrops, drapes, and set dressing. Inventory includes medical and legal props, furniture, microphones, telephones, dishware, holiday decor, and more; new items are added regularly. Moondrops N Props also offers a scenic and set shop for builds and custom work.",
+        links: [
+          {
+            kind: "website",
+            href: "https://www.moondrops.com/",
+            label: "Website",
+          },
+          {
+            kind: "phone",
+            href: "tel:+12147661924",
+            label: "(214) 766-1924",
+          },
+          {
+            kind: "email",
+            href: "mailto:lmoon@moondrops.com",
+            label: "Email",
+          },
+        ],
+      },
+      {
+        name: "Production Outfitters",
+        location: "Fort Worth",
+        description:
+          "Production supply and expendables company serving film, TV, and commercial crews in North Texas. They provide essential on-set gear, production supplies, and practical equipment for working crews.",
+        links: [
+          {
+            kind: "website",
+            href: "https://www.productionoutfitters.co/",
+            label: "Website",
+          },
+          {
+            kind: "instagram",
+            href: "https://www.instagram.com/production.outfitters",
+            label: "Instagram",
+          },
+          {
+            kind: "phone",
+            href: "tel:+18179896151",
+            label: "(817) 989-6151",
+          },
+          {
+            kind: "email",
+            href: "mailto:Orders@productionoutfitters.co",
             label: "Email",
           },
         ],
