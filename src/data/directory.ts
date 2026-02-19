@@ -35,47 +35,51 @@ export type MeetupRecurrence =
       dayOfWeek: number; // 0=Sun..6=Sat
       hour24: number;
       minute: number;
+
+      // NEW: optional interval + anchor date
+      intervalWeeks?: number; // 1 (default) or 2 for bi-weekly
+      anchorDate?: string; // "YYYY-MM-DD" anchor date for interval logic
     }
   | {
       kind: "monthlyNthDow";
-      nth: number; // 1..5
-      dayOfWeek: number; // 0=Sun..6=Sat
+      nth: number;
+      dayOfWeek: number;
       hour24: number;
       minute: number;
     }
   | {
       kind: "monthlyOnDay";
-      dayOfMonth: number; // 1..31 (if invalid for a month, clamp to last day)
+      dayOfMonth: number;
       hour24: number;
       minute: number;
     }
   | {
       kind: "quarterlyOnDay";
-      months: number[]; // e.g., [0,3,6,9] for Jan/Apr/Jul/Oct. Must be 4 months.
-      dayOfMonth: number; // 1..31 (clamp to last day when needed)
+      months: number[];
+      dayOfMonth: number;
       hour24: number;
       minute: number;
     }
   | {
       kind: "quarterlyNthDow";
-      months: number[]; // e.g., [0,3,6,9] or any 4 fixed months
-      nth: number; // 1..5
-      dayOfWeek: number; // 0=Sun..6=Sat
+      months: number[];
+      nth: number;
+      dayOfWeek: number;
       hour24: number;
       minute: number;
     }
   | {
       kind: "annualOnDate";
-      month: number; // 0=Jan..11=Dec
-      dayOfMonth: number; // 1..31 (clamp to last day when needed)
+      month: number;
+      dayOfMonth: number;
       hour24: number;
       minute: number;
     }
   | {
       kind: "annualNthDow";
-      month: number; // 0=Jan..11=Dec
-      nth: number; // 1..5
-      dayOfWeek: number; // 0=Sun..6=Sat
+      month: number;
+      nth: number;
+      dayOfWeek: number;
       hour24: number;
       minute: number;
     };
@@ -501,13 +505,25 @@ const SECTIONS_RAW: Array<
         meetups: [
           {
             title: "FWF Meetup",
-            isTBA: true,
-            recurrence: { kind: "weekly", dayOfWeek: 0, hour24: 19, minute: 0 },
-            notes:
-              "Meetup details are TBA. Check Instagram and Discord for updates.",
+            recurrence: {
+              kind: "weekly",
+              dayOfWeek: 4, // Thursday
+              hour24: 19,
+              minute: 0,
+              intervalWeeks: 2,
+              anchorDate: "2026-02-26",
+            },
+            durationMinutes: 120,
+            locationName: "West Side Art Collective",
+            locationCity: "Fort Worth, TX",
+            address: "8135 White Settlement Rd, Fort Worth, TX",
+            mapsQuery:
+              "West Side Art Collective 8135 White Settlement Rd Fort Worth TX",
+            notes: "Bi-weekly meetup starting 2/26 at 7:00 PM.",
           },
         ],
       },
+
       {
         name: "Ladies in Film & Television (Dallas)",
         location: "Arlington",

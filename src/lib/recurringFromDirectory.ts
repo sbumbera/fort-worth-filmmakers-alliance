@@ -8,8 +8,8 @@ function assertNever(x: never): never {
 }
 
 export type RecurringEvent = {
-  id: string; // stable id for recurrence rule
-  orgId: string; // directory item id (slugified)
+  id: string;
+  orgId: string;
   orgName: string;
 
   label: string;
@@ -23,34 +23,24 @@ export type RecurringEvent = {
     | "annualNthDow"
     | "annualOnDate";
 
-  // Shared time fields
-  startTime: string; // "HH:MM" 24h
+  startTime: string;
   durationMinutes: number;
 
-  // Weekly / Nth-DOW patterns
-  weekday?: number; // 0=Sun..6=Sat
-
-  // Used for monthlyNthDow / quarterlyNthDow / annualNthDow
+  weekday?: number;
   nth?: number;
-
-  // Used for monthlyOnDay / quarterlyOnDay / annualOnDate
   dayOfMonth?: number;
+  month?: number;
+  months?: number[];
 
-  // Used for annual patterns
-  month?: number; // 0=Jan..11=Dec
+  // NEW
+  intervalWeeks?: number; // 1 or 2
+  anchorDate?: string; // "YYYY-MM-DD"
 
-  // Used for quarterly patterns
-  months?: number[]; // 0=Jan..11=Dec; typically length 4
-
-  // Venue and UX fields
   isTBA?: boolean;
   venueName?: string;
-  venueAddress?: string; // can be full address or city
+  venueAddress?: string;
 
-  // Extra content for modal and Add-to-Calendar notes
   notes?: string;
-
-  // Optional event-specific link shown only in EventModal (not directory listing)
   rsvpUrl?: string;
   rsvpLabel?: string;
 };
@@ -104,6 +94,8 @@ function meetupToRecurring(
         ...base,
         kind: "weekly",
         weekday: rec.dayOfWeek,
+        intervalWeeks: (rec as any).intervalWeeks ?? 1,
+        anchorDate: (rec as any).anchorDate,
       };
 
     case "monthlyNthDow":

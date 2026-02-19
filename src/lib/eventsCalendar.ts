@@ -55,6 +55,16 @@ export function ymd(d: Date) {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 }
 
+/**
+ * DST-safe day number (UTC midnight based).
+ * Used only for interval calculations so "every 2 weeks" stays stable across DST.
+ */
+function utcDayNumber(d: Date) {
+  return Math.floor(
+    Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86_400_000,
+  );
+}
+
 export function startOfMonth(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), 1);
 }
@@ -133,7 +143,25 @@ function matchesRecurrenceOnDate(ev: RecurringEvent, cur: Date): boolean {
   switch (ev.kind) {
     case "weekly": {
       if (typeof ev.weekday !== "number") return false;
-      return weekday0 === ev.weekday;
+      if (weekday0 !== ev.weekday) return false;
+
+      const interval = ev.intervalWeeks ?? 1;
+      if (interval === 1) return true;
+
+      // If no anchor is provided, fall back to weekly behavior.
+      if (!ev.anchorDate) return true;
+
+      // Anchor is treated as a calendar date, not a moment in time.
+      // Using UTC day math prevents DST from skipping valid occurrences.
+      const anchor = new Date(ev.anchorDate + "T00:00:00");
+
+      // Only allow dates on/after anchor (prevents backfill)
+      if (utcDayNumber(cur) < utcDayNumber(anchor)) return false;
+
+      const dayDiff = utcDayNumber(cur) - utcDayNumber(anchor);
+      const weeks = Math.floor(dayDiff / 7);
+
+      return weeks % interval === 0;
     }
 
     case "monthlyNthDow": {
