@@ -506,20 +506,18 @@ const SECTIONS_RAW: Array<
           {
             title: "FWF Meetup",
             recurrence: {
-              kind: "weekly",
+              kind: "monthlyNthDow",
+              nth: 1, // First
               dayOfWeek: 4, // Thursday
               hour24: 19,
               minute: 0,
-              intervalWeeks: 2,
-              anchorDate: "2026-02-26",
             },
             durationMinutes: 120,
-            locationName: "West Side Art Collective",
-            locationCity: "Fort Worth, TX",
-            address: "8135 White Settlement Rd, Fort Worth, TX",
-            mapsQuery:
-              "West Side Art Collective 8135 White Settlement Rd Fort Worth TX",
-            notes: "Bi-weekly meetup starting 2/26 at 7:00 PM.",
+            locationName: "Generations Park",
+            locationCity: "Bedford, TX",
+            address: "2801 Forest Ridge Dr, Bedford, TX 76021",
+            mapsQuery: "Generations Park 2801 Forest Ridge Dr Bedford TX 76021",
+            notes: "Monthly meetup on the first Thursday at 7:00 PM.",
           },
         ],
       },

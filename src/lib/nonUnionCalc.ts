@@ -5,7 +5,8 @@ export type DayEntry = {
   date: string; // YYYY-MM-DD
   inTime: string; // HH:MM
   outTime: string; // HH:MM
-  mealMinutes: string; // store as string for blanking
+  lunchStart: string; // HH:MM
+  lunchEnd: string; // HH:MM
 };
 
 export type LineItem = {
@@ -30,7 +31,10 @@ export type InvoiceMeta = {
   invoiceNumber: string;
   invoiceDate: string; // YYYY-MM-DD
   productionName: string;
-  termsDays: number;
+  jobNumber: string;
+  termsDays: number; // -1 means none
+  notes: string;
+  guaranteedHours: number;
 };
 
 export function uid() {
@@ -114,9 +118,18 @@ export function minutesDiff(startMin: number, endMin: number) {
   return diff;
 }
 
-export function computeBaseHourly(dayRate: number) {
-  if (dayRate <= 0) return 0;
-  return dayRate / 14;
+export function computeWeightedHours(guaranteedHours: number) {
+  const safeGuaranteed = Math.max(0, guaranteedHours);
+  const oneXHours = Math.min(8, safeGuaranteed);
+  const onePointFiveHours = Math.max(0, safeGuaranteed - oneXHours);
+  return oneXHours + onePointFiveHours * 1.5;
+}
+
+export function computeBaseHourly(dayRate: number, guaranteedHours: number) {
+  if (dayRate <= 0 || guaranteedHours <= 0) return 0;
+  const weightedHours = computeWeightedHours(guaranteedHours);
+  if (weightedHours <= 0) return 0;
+  return dayRate / weightedHours;
 }
 
 export type DayCalc = {
@@ -125,32 +138,58 @@ export type DayCalc = {
   paidHours: number;
 
   dayPay: number;
+  regularPay: number;
+  otBeyondGuaranteedHours: number;
+  otBeyondGuaranteedPay: number;
+
+  // Kept for compatibility with existing totals/UI names
   otBeyond12Hours: number;
   otBeyond12Pay: number;
 
+  lunchMinutes: number;
+  guaranteedHours: number;
   baseHourly: number;
 };
 
 export function calcDay({
   dayRate,
   baseHourly,
+  guaranteedHours,
   inTime,
   outTime,
-  mealMinutes,
+  lunchStart,
+  lunchEnd,
 }: {
   dayRate: number;
   baseHourly: number;
+  guaranteedHours: number;
   inTime: string;
   outTime: string;
-  mealMinutes: number;
+  lunchStart: string;
+  lunchEnd: string;
 }): DayCalc {
   const start = parseTimeToMinutes(inTime);
   const end = parseTimeToMinutes(outTime);
 
+  const lunchStartMin = lunchStart ? parseTimeToMinutes(lunchStart) : null;
+  const lunchEndMin = lunchEnd ? parseTimeToMinutes(lunchEnd) : null;
+
   const errors: string[] = [];
   if (start === null) errors.push("Invalid In time.");
   if (end === null) errors.push("Invalid Out time.");
-  if (mealMinutes < 0) errors.push("Meal minutes cannot be negative.");
+  if (
+    (lunchStart && lunchStartMin === null) ||
+    (lunchEnd && lunchEndMin === null)
+  ) {
+    errors.push("Invalid lunch time.");
+  }
+  if ((lunchStart && !lunchEnd) || (!lunchStart && lunchEnd)) {
+    errors.push(
+      "Lunch start and lunch end must both be filled or both be blank.",
+    );
+  }
+  if (guaranteedHours <= 0)
+    errors.push("Guaranteed hours must be greater than zero.");
 
   if (errors.length || start === null || end === null) {
     return {
@@ -158,29 +197,46 @@ export function calcDay({
       errors,
       paidHours: 0,
       dayPay: 0,
+      regularPay: 0,
+      otBeyondGuaranteedHours: 0,
+      otBeyondGuaranteedPay: 0,
       otBeyond12Hours: 0,
       otBeyond12Pay: 0,
+      lunchMinutes: 0,
+      guaranteedHours,
       baseHourly,
     };
   }
 
   const totalMinutes = minutesDiff(start, end);
-  const paidMinutes = Math.max(0, totalMinutes - mealMinutes);
+
+  let lunchMinutes = 0;
+  if (lunchStartMin !== null && lunchEndMin !== null) {
+    lunchMinutes = minutesDiff(lunchStartMin, lunchEndMin);
+  }
+
+  const paidMinutes = Math.max(0, totalMinutes - lunchMinutes);
   const paidHours = paidMinutes / 60;
 
-  const otBeyond12Hours = Math.max(0, paidHours - 12);
-  const otBeyond12Pay = otBeyond12Hours * baseHourly * 2.0;
+  const otBeyondGuaranteedHours = Math.max(0, paidHours - guaranteedHours);
+  const otBeyondGuaranteedPay = otBeyondGuaranteedHours * baseHourly * 2.0;
 
-  // Guarantee: day rate covers <= 12 paid hours
-  const dayPay = paidHours <= 12 ? dayRate : dayRate + otBeyond12Pay;
+  const regularPay = dayRate;
+  const dayPay =
+    paidHours <= guaranteedHours ? dayRate : dayRate + otBeyondGuaranteedPay;
 
   return {
     ok: true,
     errors: [],
     paidHours,
     dayPay,
-    otBeyond12Hours,
-    otBeyond12Pay,
+    regularPay,
+    otBeyondGuaranteedHours,
+    otBeyondGuaranteedPay,
+    otBeyond12Hours: otBeyondGuaranteedHours,
+    otBeyond12Pay: otBeyondGuaranteedPay,
+    lunchMinutes,
+    guaranteedHours,
     baseHourly,
   };
 }

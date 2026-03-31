@@ -13,6 +13,13 @@ const TOOLS: ToolCard[] = [
     href: "/tools/nonunioncalc",
     badge: "Beta",
   },
+  {
+    title: "Per Diem Batch Generator",
+    description:
+      "Bulk-create per diem sheets by date and rate; assign to multiple crew members and generate clean, print-ready cards.",
+    href: "/tools/perdiem",
+    badge: "New",
+  },
 ];
 
 export default function ToolsPage() {

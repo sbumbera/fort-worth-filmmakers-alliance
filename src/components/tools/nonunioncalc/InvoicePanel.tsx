@@ -7,7 +7,6 @@ import type {
   LineItem,
 } from "@/lib/nonUnionCalc";
 import {
-  cn,
   formatMoney,
   round2,
   safeNumber,
@@ -16,12 +15,29 @@ import {
   formatDateShort,
 } from "@/lib/nonUnionCalc";
 
-type InvoiceRow = {
-  description: string;
-  qty?: string;
-  rate?: string;
+type LaborInvoiceRow = {
+  kind: "labor";
+  dayLabel: string;
+  start: string;
+  lunchStart: string;
+  lunchEnd: string;
+  end: string;
+  regular: number;
+  overtime: number;
   amount: number;
 };
+
+type SimpleInvoiceRow = {
+  kind: "simple";
+  description: string;
+  amount: number;
+};
+
+type DividerInvoiceRow = {
+  kind: "divider";
+};
+
+type InvoiceRow = LaborInvoiceRow | SimpleInvoiceRow | DividerInvoiceRow;
 
 function partyLines(p: InvoiceParty) {
   const lines: string[] = [];
@@ -45,6 +61,16 @@ function partyLines(p: InvoiceParty) {
   if (phone) lines.push(phone);
 
   return lines.length ? lines : ["N/A"];
+}
+
+function displayTime(value: string) {
+  return value?.trim() ? value.trim() : "—";
+}
+
+function formatMileageRate(rate: number) {
+  const safe = safeNumber(rate);
+  if (safe <= 0) return "0";
+  return safe.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
 }
 
 export default function InvoicePanel({
@@ -80,8 +106,16 @@ export default function InvoicePanel({
   const invoiceDate = meta.invoiceDate?.trim()
     ? meta.invoiceDate.trim()
     : todayISO();
-  const termsDays = Math.max(0, Math.floor(meta.termsDays || 0));
-  const dueDate = addDaysISO(invoiceDate, termsDays);
+
+  const termsDaysRaw = Number(meta.termsDays);
+  const hasTerms = Number.isFinite(termsDaysRaw) && termsDaysRaw >= 0;
+  const termsDays = hasTerms ? Math.floor(termsDaysRaw) : -1;
+  const dueDate = hasTerms ? addDaysISO(invoiceDate, termsDays) : "";
+  const termsLabel = !hasTerms
+    ? ""
+    : termsDays === 0
+      ? "Due on receipt"
+      : `Net ${termsDays}`;
 
   async function generateInvoicePdf() {
     const { jsPDF } = await import("jspdf");
@@ -95,7 +129,7 @@ export default function InvoicePanel({
 
     const pageW = 612;
     const pageH = 792;
-    const margin = 48;
+    const margin = 36;
     const contentW = pageW - margin * 2;
 
     const colorText = [20, 20, 20] as const;
@@ -125,44 +159,44 @@ export default function InvoicePanel({
       doc.line(margin, y, margin + contentW, y);
     };
 
-    // Page background
     doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, pageW, pageH, "F");
     setText(colorText);
 
     let y = margin;
 
-    // Title
     font(20, true);
     doc.text("Invoice", margin, y);
 
-    // Right details block
     const invNum = meta.invoiceNumber?.trim()
       ? meta.invoiceNumber.trim()
       : "N/A";
     const prodNameRaw = meta.productionName?.trim()
       ? meta.productionName.trim()
       : "";
-    const termsLabel = termsDays === 0 ? "Due on receipt" : `Net ${termsDays}`;
+    const jobNumberRaw = meta.jobNumber?.trim() ? meta.jobNumber.trim() : "";
 
     const detailsRows: Array<[string, string]> = [
       ["Invoice #", invNum],
       ["Invoice date", invoiceDate],
-      ["Due date", dueDate],
-      ["Terms", termsLabel],
     ];
 
+    if (hasTerms) {
+      detailsRows.push(["Due date", dueDate], ["Terms", termsLabel]);
+    }
+
     if (prodNameRaw) detailsRows.push(["Production", prodNameRaw]);
+    if (jobNumberRaw) detailsRows.push(["Job #", jobNumberRaw]);
+    if (meta.guaranteedHours > 0) {
+      detailsRows.push(["Guaranteed day", `${meta.guaranteedHours} hours`]);
+    }
 
     const detailsXRight = margin + contentW;
     const labelW = 110;
     const valueW = 180;
     const rowH = 16;
 
-    // Details start y aligned to title baseline
     let dy = y - 8;
-    const detailsTop = dy;
-
     detailsRows.forEach(([k, v]) => {
       font(9, true);
       setText(colorMuted);
@@ -175,9 +209,7 @@ export default function InvoicePanel({
 
     const detailsBottom = dy;
 
-    // Subtitle (wrapped, constrained to left area)
-    const subtitleText =
-      "Prepared for film production billing and reimbursement.";
+    const subtitleText = meta.notes?.trim() || "";
     const rightBlockW = labelW + valueW;
     const subtitleMaxW = contentW - rightBlockW - 12;
     let subY = y + 22;
@@ -185,21 +217,21 @@ export default function InvoicePanel({
     font(10, false);
     setText(colorMuted);
 
-    const subtitleLines = wrapLines(subtitleText, subtitleMaxW);
-    subtitleLines.forEach((ln) => {
-      doc.text(ln, margin, subY);
-      subY += 14;
-    });
+    if (subtitleText) {
+      const subtitleLines = wrapLines(subtitleText, subtitleMaxW);
+      subtitleLines.forEach((ln) => {
+        doc.text(ln, margin, subY);
+        subY += 14;
+      });
+    }
 
-    const subtitleBottom = subY;
+    const subtitleBottom = subtitleText ? subY : y + 10;
 
-    // Divider after whichever block ends lower
     const dividerY = Math.max(detailsBottom + 6, subtitleBottom + 6);
     y = dividerY;
     drawHLine(y);
     y += 18;
 
-    // Parties
     const colGap = 24;
     const colW = (contentW - colGap) / 2;
 
@@ -239,7 +271,6 @@ export default function InvoicePanel({
     drawHLine(y);
     y += 18;
 
-    // Build table rows
     const rows: InvoiceRow[] = [];
 
     dayCalcs.forEach((x, idx) => {
@@ -247,66 +278,81 @@ export default function InvoicePanel({
 
       const dateShort = formatDateShort(x.day.date);
       const dayLabel = dateShort
-        ? `Labor: Day ${idx + 1} (${dateShort})`
-        : `Labor: Day ${idx + 1}`;
+        ? `Day ${idx + 1} (${dateShort})`
+        : `Day ${idx + 1}`;
 
-      const mealMin = safeNumber(x.day.mealMinutes);
-      const details = `In ${x.day.inTime || "N/A"}, Out ${
-        x.day.outTime || "N/A"
-      }, Meal ${mealMin || 0} min, Paid ${round2(x.calc.paidHours)}h`;
-
-      const amount = x.calc.dayPay;
       rows.push({
-        description: `${dayLabel}\n${details}`,
-        qty: "1",
-        rate: money(amount),
-        amount,
+        kind: "labor",
+        dayLabel,
+        start: displayTime(x.day.inTime),
+        lunchStart: displayTime(x.day.lunchStart),
+        lunchEnd: displayTime(x.day.lunchEnd),
+        end: displayTime(x.day.outTime),
+        regular: x.calc.regularPay,
+        overtime: x.calc.otBeyondGuaranteedPay,
+        amount: x.calc.dayPay,
       });
     });
 
     const mileageAmount = totals.mileagePay;
+    const expenseItems = lineItems.filter((it) => safeNumber(it.cost) > 0);
+    const hasExtras =
+      (safeNumber(miles) > 0 &&
+        safeNumber(mileageRate) > 0 &&
+        mileageAmount > 0) ||
+      expenseItems.length > 0;
+
+    if (hasExtras) {
+      rows.push({ kind: "divider" });
+    }
+
     if (
       safeNumber(miles) > 0 &&
       safeNumber(mileageRate) > 0 &&
       mileageAmount > 0
     ) {
       rows.push({
-        description: `Mileage\n${round2(safeNumber(miles))} miles @ ${money(
-          safeNumber(mileageRate)
+        kind: "simple",
+        description: `Mileage: ${round2(safeNumber(miles))} miles @ ${formatMileageRate(
+          safeNumber(mileageRate),
         )}/mi`,
         amount: mileageAmount,
       });
     }
 
-    lineItems
-      .filter((it) => safeNumber(it.cost) > 0)
-      .forEach((it) => {
-        const title = it.title?.trim() ? it.title.trim() : "Expense";
-        const desc = it.description?.trim() ? it.description.trim() : "";
-        rows.push({
-          description: desc
-            ? `Expense\n${title}\n${desc}`
-            : `Expense\n${title}`,
-          amount: safeNumber(it.cost),
-        });
+    expenseItems.forEach((it) => {
+      const title = it.title?.trim() ? it.title.trim() : "Expense";
+      const desc = it.description?.trim() ? it.description.trim() : "";
+      rows.push({
+        kind: "simple",
+        description: desc ? `${title}: ${desc}` : title,
+        amount: safeNumber(it.cost),
       });
+    });
 
-    // Table geometry
     const tableX = margin;
     const tableW = contentW;
 
-    const colDesc = Math.floor(tableW * 0.56);
-    const colQty = Math.floor(tableW * 0.1);
-    const colRate = Math.floor(tableW * 0.17);
-    const colAmt = tableW - colDesc - colQty - colRate;
-
-    const xDesc = tableX;
-    const xQty = tableX + colDesc;
-    const xRate = xQty + colQty;
-    const xAmt = xRate + colRate;
+    const columns = [
+      { key: "day", label: "Day", width: 88 },
+      { key: "start", label: "Start", width: 52 },
+      { key: "lunchStart", label: "Lunch In", width: 60 },
+      { key: "lunchEnd", label: "Lunch Out", width: 64 },
+      { key: "end", label: "End", width: 52 },
+      { key: "regular", label: "Regular", width: 66 },
+      { key: "ot", label: "OT", width: 54 },
+      { key: "total", label: "Total", width: 64 },
+    ] as const;
 
     const headerH = 24;
-    const rowPadY = 10;
+    const rowPadY = 8;
+
+    const xPositions: number[] = [];
+    let runningX = tableX;
+    columns.forEach((col) => {
+      xPositions.push(runningX);
+      runningX += col.width;
+    });
 
     const ensurePage = (needed: number) => {
       if (y + needed <= pageH - margin) return;
@@ -316,59 +362,116 @@ export default function InvoicePanel({
       y = margin;
     };
 
-    // Header
-    ensurePage(120);
-
-    doc.setFillColor(
-      colorHeaderFill[0],
-      colorHeaderFill[1],
-      colorHeaderFill[2]
-    );
-    doc.rect(tableX, y, tableW, headerH, "F");
-    setLine();
-    doc.setLineWidth(1);
-    doc.rect(tableX, y, tableW, headerH);
-
-    font(9, true);
-    setText(colorMuted);
-    doc.text("Description", xDesc + 10, y + 16);
-    doc.text("Qty", xQty + 10, y + 16);
-    doc.text("Rate", xRate + 10, y + 16);
-    doc.text("Amount", xAmt + 10, y + 16);
-
-    y += headerH;
-
-    // Rows
-    rows.forEach((r) => {
-      const descLines = wrapLines(r.description, colDesc - 20);
-      const rowH = Math.max(28, descLines.length * 14 + rowPadY);
-
-      ensurePage(rowH + 160);
-
+    const drawTableHeader = () => {
+      doc.setFillColor(
+        colorHeaderFill[0],
+        colorHeaderFill[1],
+        colorHeaderFill[2],
+      );
+      doc.rect(tableX, y, tableW, headerH, "F");
       setLine();
-      doc.rect(tableX, y, tableW, rowH);
-      doc.line(xQty, y, xQty, y + rowH);
-      doc.line(xRate, y, xRate, y + rowH);
-      doc.line(xAmt, y, xAmt, y + rowH);
+      doc.setLineWidth(1);
+      doc.rect(tableX, y, tableW, headerH);
 
-      font(9, false);
-      setText(colorText);
+      for (let i = 1; i < xPositions.length; i += 1) {
+        doc.line(xPositions[i], y, xPositions[i], y + headerH);
+      }
 
-      let ty = y + 18;
-      descLines.forEach((dl) => {
-        doc.text(dl, xDesc + 10, ty);
-        ty += 14;
+      font(8, true);
+      setText(colorMuted);
+      columns.forEach((col, idx) => {
+        doc.text(col.label, xPositions[idx] + 6, y + 16);
       });
 
-      if (r.qty) doc.text(r.qty, xQty + 10, y + 18);
-      if (r.rate) doc.text(r.rate, xRate + 10, y + 18);
+      y += headerH;
+    };
 
-      doc.text(money(r.amount), xAmt + 10, y + 18);
+    ensurePage(120);
+    drawTableHeader();
 
-      y += rowH;
+    rows.forEach((r) => {
+      if (r.kind === "labor") {
+        const dayLines = wrapLines(r.dayLabel, columns[0].width - 12);
+        const rowHeight = Math.max(26, dayLines.length * 12 + rowPadY);
+
+        ensurePage(rowHeight + 160);
+        if (y + rowHeight > pageH - margin) {
+          drawTableHeader();
+        }
+
+        setLine();
+        doc.rect(tableX, y, tableW, rowHeight);
+        for (let i = 1; i < xPositions.length; i += 1) {
+          doc.line(xPositions[i], y, xPositions[i], y + rowHeight);
+        }
+
+        font(8, false);
+        setText(colorText);
+
+        let lineY = y + 16;
+        dayLines.forEach((line) => {
+          doc.text(line, xPositions[0] + 6, lineY);
+          lineY += 12;
+        });
+
+        doc.text(r.start, xPositions[1] + 6, y + 16);
+        doc.text(r.lunchStart, xPositions[2] + 6, y + 16);
+        doc.text(r.lunchEnd, xPositions[3] + 6, y + 16);
+        doc.text(r.end, xPositions[4] + 6, y + 16);
+        doc.text(money(r.regular), xPositions[5] + 6, y + 16);
+        doc.text(money(r.overtime), xPositions[6] + 6, y + 16);
+        doc.text(money(r.amount), xPositions[7] + 6, y + 16);
+
+        y += rowHeight;
+        return;
+      }
+
+      if (r.kind === "divider") {
+        const dividerHeight = 18;
+
+        ensurePage(dividerHeight + 160);
+        if (y + dividerHeight > pageH - margin) {
+          drawTableHeader();
+        }
+
+        setLine();
+        doc.line(
+          tableX,
+          y + dividerHeight / 2,
+          tableX + tableW,
+          y + dividerHeight / 2,
+        );
+        y += dividerHeight;
+        return;
+      }
+
+      const descMaxW = xPositions[7] - tableX - 12;
+      const descLines = wrapLines(r.description, descMaxW);
+      const rowHeight = Math.max(24, descLines.length * 12 + rowPadY);
+
+      ensurePage(rowHeight + 160);
+      if (y + rowHeight > pageH - margin) {
+        drawTableHeader();
+      }
+
+      setLine();
+      doc.rect(tableX, y, tableW, rowHeight);
+      doc.line(xPositions[7], y, xPositions[7], y + rowHeight);
+
+      font(8, false);
+      setText(colorText);
+
+      let lineY = y + 16;
+      descLines.forEach((line) => {
+        doc.text(line, tableX + 6, lineY);
+        lineY += 12;
+      });
+
+      doc.text(money(r.amount), xPositions[7] + 6, y + 16);
+
+      y += rowHeight;
     });
 
-    // Totals box
     y += 18;
     ensurePage(160);
 
@@ -403,42 +506,54 @@ export default function InvoicePanel({
 
     totalsLine("Total", money(totals.grandTotal), true);
 
-    // No footer note (removed per request)
-
     const blob = doc.output("blob");
     const url = URL.createObjectURL(blob);
     setPdfUrl(url);
   }
 
   return (
-    <div className="mt-6 rounded-3xl border border-white/10 bg-black/25 p-5">
+    <div className="rounded-3xl border border-white/10 bg-black/25 p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="text-base font-semibold text-white">Invoice PDF</div>
-        <div className="flex flex-wrap gap-2">
+        <div>
+          <div className="text-base font-semibold text-white">Invoice PDF</div>
+          <div className="mt-1 text-sm text-white/60">
+            Generate a PDF invoice using your days, mileage, expenses, terms,
+            notes, production name, and job number.
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
           <button
             type="button"
             onClick={generateInvoicePdf}
-            className="inline-flex items-center rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black hover:opacity-90"
+            className="inline-flex items-center rounded-2xl border border-white/12 bg-white/5 px-4 py-3 text-sm font-semibold text-white hover:bg-white/10"
           >
-            Generate invoice
+            Generate PDF
           </button>
+
+          {pdfUrl ? (
+            <a
+              href={pdfUrl}
+              download={`invoice-${meta.invoiceNumber?.trim() || "draft"}.pdf`}
+              className="inline-flex items-center rounded-2xl border border-white/12 bg-white px-4 py-3 text-sm font-semibold text-black hover:bg-white/90"
+            >
+              Download PDF
+            </a>
+          ) : null}
         </div>
       </div>
 
       {pdfUrl ? (
-        <div className="mt-4 overflow-hidden rounded-3xl border border-white/10 bg-black/25">
-          <div className="border-b border-white/10 px-4 py-3 text-xs font-semibold text-white/70">
-            PDF Preview
-          </div>
+        <div className="mt-5 overflow-hidden rounded-3xl border border-white/10 bg-white">
           <iframe
-            title="Invoice PDF Preview"
             src={pdfUrl}
-            className="h-[720px] w-full"
+            title="Invoice PDF Preview"
+            className="h-[900px] w-full"
           />
         </div>
       ) : (
-        <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-white/70">
-          Click “Generate invoice” to preview a PDF here, then download it.
+        <div className="mt-5 rounded-2xl border border-dashed border-white/10 bg-black/20 p-6 text-sm text-white/50">
+          Generate the invoice to preview it here before downloading.
         </div>
       )}
     </div>

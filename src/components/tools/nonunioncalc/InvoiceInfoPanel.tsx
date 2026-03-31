@@ -4,6 +4,7 @@ import type { InvoiceMeta, InvoiceParty } from "@/lib/nonUnionCalc";
 import { digitsOnly, formatPhone, todayISO } from "@/lib/nonUnionCalc";
 
 const TERMS_OPTIONS: Array<{ label: string; days: number }> = [
+  { label: "None", days: -1 },
   { label: "Due on receipt", days: 0 },
   { label: "Net 15", days: 15 },
   { label: "Net 30", days: 30 },
@@ -61,7 +62,7 @@ export default function InvoiceInfoPanel({
               />
             </div>
 
-            <div className="sm:col-span-2">
+            <div>
               <FieldLabel title="Production name" />
               <input
                 value={meta.productionName}
@@ -73,10 +74,22 @@ export default function InvoiceInfoPanel({
               />
             </div>
 
-            <div className="sm:col-span-2">
+            <div>
+              <FieldLabel title="Job number" />
+              <input
+                value={meta.jobNumber}
+                onChange={(e) =>
+                  setMeta((m) => ({ ...m, jobNumber: e.target.value }))
+                }
+                className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white/90 outline-none focus:border-white/20"
+                placeholder="Job # (optional)"
+              />
+            </div>
+
+            <div>
               <FieldLabel
                 title="Terms"
-                help="Sets the due date based on the invoice date. Example: Net 30 means due 30 days after invoice date."
+                help="Sets the due date based on the invoice date. Choose None if you do not want terms shown."
               />
               <select
                 value={meta.termsDays}
@@ -89,16 +102,52 @@ export default function InvoiceInfoPanel({
                 className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white/90 outline-none focus:border-white/20"
               >
                 {TERMS_OPTIONS.map((t) => (
-                  <option key={t.days} value={t.days}>
+                  <option key={`${t.label}-${t.days}`} value={t.days}>
                     {t.label}
                   </option>
                 ))}
               </select>
             </div>
+
+            <div>
+              <FieldLabel
+                title="Guaranteed hours"
+                help="Used for invoice reference. The calculator's guaranteed-hours dropdown should match this."
+              />
+              <select
+                value={meta.guaranteedHours}
+                onChange={(e) =>
+                  setMeta((m) => ({
+                    ...m,
+                    guaranteedHours: Number(e.target.value),
+                  }))
+                }
+                className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white/90 outline-none focus:border-white/20"
+              >
+                <option value={10}>10 hours</option>
+                <option value={12}>12 hours</option>
+                <option value={14}>14 hours</option>
+              </select>
+            </div>
+
+            <div className="sm:col-span-2">
+              <FieldLabel
+                title="Notes"
+                help="Optional custom note that appears under the invoice header."
+              />
+              <textarea
+                value={meta.notes}
+                onChange={(e) =>
+                  setMeta((m) => ({ ...m, notes: e.target.value }))
+                }
+                rows={3}
+                className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white/90 outline-none focus:border-white/20"
+                placeholder="Optional notes"
+              />
+            </div>
           </div>
         </div>
 
-        {/* From */}
         <div className="rounded-2xl border border-white/10 bg-black/25 p-3">
           <div className="text-xs font-semibold text-white/70">From</div>
 
@@ -206,16 +255,15 @@ export default function InvoiceInfoPanel({
                   }
                   inputMode="numeric"
                   className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white/90 outline-none focus:border-white/20"
-                  placeholder="00000"
+                  placeholder="ZIP"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        {/* To */}
         <div className="rounded-2xl border border-white/10 bg-black/25 p-3">
-          <div className="text-xs font-semibold text-white/70">To</div>
+          <div className="text-xs font-semibold text-white/70">Bill To</div>
 
           <div className="mt-2 space-y-2">
             <div>
@@ -224,7 +272,7 @@ export default function InvoiceInfoPanel({
                 value={to.name}
                 onChange={(e) => setTo((p) => ({ ...p, name: e.target.value }))}
                 className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white/90 outline-none focus:border-white/20"
-                placeholder="Production contact"
+                placeholder="Company / person"
               />
             </div>
 
@@ -268,7 +316,7 @@ export default function InvoiceInfoPanel({
                   setTo((p) => ({ ...p, address1: e.target.value }))
                 }
                 className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white/90 outline-none focus:border-white/20"
-                placeholder="123 Production St"
+                placeholder="123 Main St"
               />
             </div>
 
@@ -280,7 +328,7 @@ export default function InvoiceInfoPanel({
                   setTo((p) => ({ ...p, address2: e.target.value }))
                 }
                 className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white/90 outline-none focus:border-white/20"
-                placeholder="Suite 100 (optional)"
+                placeholder="Suite / optional"
               />
             </div>
 
@@ -319,16 +367,11 @@ export default function InvoiceInfoPanel({
                   }
                   inputMode="numeric"
                   className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white/90 outline-none focus:border-white/20"
-                  placeholder="00000"
+                  placeholder="ZIP"
                 />
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-xs text-white/60">
-          Tip: You can use the tool as a calculator first. Fill invoice info
-          only when you are ready to generate a PDF.
         </div>
       </div>
     </div>

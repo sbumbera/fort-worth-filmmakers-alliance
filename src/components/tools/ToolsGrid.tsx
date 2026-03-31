@@ -1,5 +1,7 @@
-// src/components/tools/ToolsGrid.tsx
+"use client";
+
 import Link from "next/link";
+import React from "react";
 
 export type ToolCard = {
   title: string;
@@ -10,28 +12,40 @@ export type ToolCard = {
 
 export default function ToolsGrid({ tools }: { tools: ToolCard[] }) {
   return (
-    <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="mt-8 grid gap-4 sm:grid-cols-2">
       {tools.map((t) => (
         <Link
           key={t.href}
           href={t.href}
-          className="group rounded-3xl border border-white/10 bg-black/25 p-5 transition hover:border-white/20 hover:bg-black/30"
+          className="group rounded-[34px] border border-white/10 bg-black/25 p-6 transition hover:bg-white/[0.04]"
         >
-          <div className="flex items-start justify-between gap-3">
-            <div className="text-base font-semibold text-white">{t.title}</div>
-            {t.badge ? (
-              <span className="shrink-0 rounded-full border border-white/12 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-white/70">
-                {t.badge}
+          <div className="flex h-full min-h-[240px] flex-col">
+            {/* Fixed-height header block so body text lines up across cards */}
+            <div className="flex items-start justify-between gap-4">
+              <h2 className="text-balance text-xl font-semibold tracking-tight text-white sm:text-2xl">
+                <span className="block min-h-[72px] [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical] overflow-hidden">
+                  {t.title}
+                </span>
+              </h2>
+
+              {t.badge ? (
+                <span className="shrink-0 rounded-full border border-white/12 bg-white/5 px-3 py-1 text-xs font-semibold text-white/70">
+                  {t.badge}
+                </span>
+              ) : null}
+            </div>
+
+            {/* Description will now always start at the same vertical position */}
+            <p className="mt-3 text-pretty text-sm leading-relaxed text-white/70 sm:text-base">
+              {t.description}
+            </p>
+
+            {/* CTA pinned to bottom */}
+            <div className="mt-auto pt-6">
+              <span className="inline-flex items-center gap-2 text-sm font-semibold text-white">
+                Open tool <span aria-hidden="true">→</span>
               </span>
-            ) : null}
-          </div>
-
-          <p className="mt-2 text-sm leading-relaxed text-white/70">
-            {t.description}
-          </p>
-
-          <div className="mt-4 text-sm font-semibold text-white/85 group-hover:text-white">
-            Open tool →
+            </div>
           </div>
         </Link>
       ))}

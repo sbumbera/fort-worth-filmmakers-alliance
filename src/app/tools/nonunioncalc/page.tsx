@@ -27,8 +27,8 @@ import {
 } from "@/lib/nonUnionCalc";
 
 export default function NonUnionCrewCalculatorPage() {
-  // Calculator inputs
   const [dayRateStr, setDayRateStr] = useState<string>("");
+  const [guaranteedHours, setGuaranteedHours] = useState<number>(12);
   const [milesStr, setMilesStr] = useState<string>("");
   const [mileageRateStr, setMileageRateStr] = useState<string>("0.725");
 
@@ -37,12 +37,18 @@ export default function NonUnionCrewCalculatorPage() {
   const mileageRate = safeNumber(mileageRateStr);
 
   const [days, setDays] = useState<DayEntry[]>([
-    { id: uid(), date: "", inTime: "", outTime: "", mealMinutes: "" },
+    {
+      id: uid(),
+      date: "",
+      inTime: "",
+      outTime: "",
+      lunchStart: "",
+      lunchEnd: "",
+    },
   ]);
 
   const [lineItems, setLineItems] = useState<LineItem[]>([]);
 
-  // Invoice info (kept separate so calculator can be used first)
   const [from, setFrom] = useState<InvoiceParty>({
     name: "",
     email: "",
@@ -69,12 +75,18 @@ export default function NonUnionCrewCalculatorPage() {
     invoiceNumber: "",
     invoiceDate: todayISO(),
     productionName: "",
+    jobNumber: "",
     termsDays: 30,
+    notes: "",
+    guaranteedHours: 12,
   });
 
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
-  const baseHourly = useMemo(() => computeBaseHourly(dayRate), [dayRate]);
+  const baseHourly = useMemo(
+    () => computeBaseHourly(dayRate, guaranteedHours),
+    [dayRate, guaranteedHours],
+  );
 
   const dayCalcs = useMemo(() => {
     return days.map((d) => ({
@@ -82,12 +94,14 @@ export default function NonUnionCrewCalculatorPage() {
       calc: calcDay({
         dayRate,
         baseHourly,
+        guaranteedHours,
         inTime: d.inTime,
         outTime: d.outTime,
-        mealMinutes: safeNumber(d.mealMinutes),
+        lunchStart: d.lunchStart,
+        lunchEnd: d.lunchEnd,
       }),
     }));
-  }, [days, baseHourly, dayRate]);
+  }, [days, baseHourly, dayRate, guaranteedHours]);
 
   const expensesTotal = useMemo(() => sumExpenses(lineItems), [lineItems]);
 
@@ -135,9 +149,9 @@ export default function NonUnionCrewCalculatorPage() {
 
               <p className="max-w-3xl text-pretty text-base text-white/70 sm:text-lg">
                 Calculating pay in this industry is weird. Day rate is
-                guaranteed for 12 paid hours or less. Overtime begins after 12
-                paid hours. Use this tool to calculate everything and generate
-                an invoice.
+                guaranteed for the selected paid hours or less. Overtime begins
+                after those paid hours. Use this tool to calculate everything
+                and generate an invoice.
               </p>
 
               <div>
@@ -151,10 +165,14 @@ export default function NonUnionCrewCalculatorPage() {
             </div>
 
             <div className="mt-8 space-y-6">
-              {/* Calculator first */}
               <InputsPanel
                 dayRateStr={dayRateStr}
                 setDayRateStr={setDayRateStr}
+                guaranteedHours={guaranteedHours}
+                setGuaranteedHours={(hours) => {
+                  setGuaranteedHours(hours);
+                  setMeta((m) => ({ ...m, guaranteedHours: hours }));
+                }}
                 baseHourly={baseHourly}
                 milesStr={milesStr}
                 setMilesStr={setMilesStr}
@@ -170,6 +188,7 @@ export default function NonUnionCrewCalculatorPage() {
                 dayCalcs={dayCalcs}
                 dayRate={dayRate}
                 baseHourly={baseHourly}
+                guaranteedHours={guaranteedHours}
               />
 
               <TotalsPanel
@@ -178,7 +197,6 @@ export default function NonUnionCrewCalculatorPage() {
                 mileageRate={mileageRate}
               />
 
-              {/* Invoice info second */}
               <InvoiceInfoPanel
                 meta={meta}
                 setMeta={setMeta}
@@ -188,7 +206,6 @@ export default function NonUnionCrewCalculatorPage() {
                 setTo={setTo}
               />
 
-              {/* PDF last */}
               <InvoicePanel
                 totals={totals}
                 miles={miles}

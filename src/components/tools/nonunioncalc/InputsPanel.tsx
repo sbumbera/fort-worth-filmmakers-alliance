@@ -2,17 +2,13 @@ import React from "react";
 import FieldLabel from "@/components/tools/nonunioncalc/FieldLabel";
 import { Tooltip } from "@/components/tools/nonunioncalc/Tooltip";
 import type { LineItem } from "@/lib/nonUnionCalc";
-import {
-  formatMoney,
-  uid,
-  safeNumber,
-  round2,
-  sumExpenses,
-} from "@/lib/nonUnionCalc";
+import { formatMoney, uid, sumExpenses } from "@/lib/nonUnionCalc";
 
 export default function InputsPanel({
   dayRateStr,
   setDayRateStr,
+  guaranteedHours,
+  setGuaranteedHours,
   baseHourly,
   milesStr,
   setMilesStr,
@@ -23,6 +19,8 @@ export default function InputsPanel({
 }: {
   dayRateStr: string;
   setDayRateStr: (v: string) => void;
+  guaranteedHours: number;
+  setGuaranteedHours: (v: number) => void;
   baseHourly: number;
 
   milesStr: string;
@@ -51,30 +49,49 @@ export default function InputsPanel({
       <div className="text-base font-semibold text-white">Inputs</div>
 
       <div className="mt-4 space-y-5">
-        <div>
-          <FieldLabel
-            title="Day rate"
-            help="Guaranteed pay for 12 paid hours or less. Overtime begins only after 12 paid hours."
-          />
-          <input
-            inputMode="decimal"
-            value={dayRateStr}
-            onChange={(e) => {
-              const v = e.target.value;
-              if (/^[0-9]*\.?[0-9]*$/.test(v)) setDayRateStr(v);
-            }}
-            className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/90 placeholder:text-white/40 outline-none focus:border-white/20"
-            placeholder="300"
-          />
-          <div className="mt-2 text-xs text-white/60">
-            Base hourly for OT:{" "}
-            <Tooltip label="Used only to compute overtime beyond 12 hours. Day Rate ÷ 14 because a 12-hour day is priced as 14 weighted hours: 8 at 1.0x plus 4 at 1.5x.">
-              <span className="font-semibold text-white/80">
-                {baseHourly > 0 ? formatMoney(baseHourly) : "$0.00"}
-              </span>
-            </Tooltip>
-            <span className="text-white/50"> per hour</span>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <FieldLabel
+              title="Day rate"
+              help="Guaranteed pay for the selected paid hours or less. Overtime begins only after those paid hours."
+            />
+            <input
+              inputMode="decimal"
+              value={dayRateStr}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (/^[0-9]*\.?[0-9]*$/.test(v)) setDayRateStr(v);
+              }}
+              className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/90 placeholder:text-white/40 outline-none focus:border-white/20"
+              placeholder="300"
+            />
           </div>
+
+          <div>
+            <FieldLabel
+              title="Guaranteed hours"
+              help="Choose the length of the guaranteed day. The base hourly math will adjust automatically using the same weighted-rate logic."
+            />
+            <select
+              value={guaranteedHours}
+              onChange={(e) => setGuaranteedHours(Number(e.target.value))}
+              className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/90 outline-none focus:border-white/20"
+            >
+              <option value={10}>10 hours</option>
+              <option value={12}>12 hours</option>
+              <option value={14}>14 hours</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="text-xs text-white/60">
+          Base hourly for OT:{" "}
+          <Tooltip label="Used only to compute overtime beyond the selected guaranteed hours. The day rate is converted into weighted hours using 1.0x for the first 8 hours and 1.5x for the remaining guaranteed hours.">
+            <span className="font-semibold text-white/80">
+              {baseHourly > 0 ? formatMoney(baseHourly) : "$0.00"}
+            </span>
+          </Tooltip>
+          <span className="text-white/50"> per hour</span>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -164,7 +181,7 @@ export default function InputsPanel({
                         )
                       }
                       className="mt-1 w-full rounded-2xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white/90 outline-none focus:border-white/20"
-                      placeholder="Expense"
+                      placeholder="Parking"
                     />
                   </div>
 
