@@ -33,7 +33,6 @@ export type BuildResult = {
 
 export function uid(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    // @ts-expect-error randomUUID exists
     return crypto.randomUUID();
   }
   return `${Date.now()}_${Math.random().toString(16).slice(2)}`;
