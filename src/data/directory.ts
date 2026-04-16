@@ -375,7 +375,7 @@ const SECTIONS_RAW: Array<
         name: "Dallas Screenwriters Association (DSA)",
         location: "Dallas",
         description:
-          "Nonprofit founded in 1986 offering meetings, workshops, and speakers to help writers develop screenplays and industry knowledge.",
+          "Longstanding nonprofit supporting screenwriters through workshops, industry speakers, and collaborative development, with a strong focus on refining scripts through live feedback and community critique.",
         links: [
           {
             kind: "website",
@@ -391,6 +391,25 @@ const SECTIONS_RAW: Array<
             kind: "instagram",
             href: "https://www.instagram.com/dallasscreenwriters",
             label: "Instagram",
+          },
+        ],
+        meetups: [
+          {
+            title: "DSA Scene Reads",
+            recurrence: {
+              kind: "monthlyNthDow",
+              nth: -1, // Last
+              dayOfWeek: 2, // Tuesday
+              hour24: 19,
+              minute: 0,
+            },
+            durationMinutes: 120,
+            locationName: "KD Studio",
+            locationCity: "Dallas, TX",
+            address: "13465 Midway Road, Dallas, TX 75244",
+            mapsQuery: "KD Studio 13465 Midway Road Dallas TX 75244",
+            notes:
+              "Monthly scene read held on the last Tuesday from 7:00–9:00 PM; check DSA channels for schedule changes or special sessions.",
           },
         ],
       },
@@ -1170,6 +1189,39 @@ const SECTIONS_RAW: Array<
             kind: "linkedin",
             href: "https://www.linkedin.com/company/101-sudios",
             label: "LinkedIn",
+          },
+        ],
+      },
+      {
+        name: "Twelve Midnight",
+        location: "Fort Worth",
+        description:
+          "Boundary-pushing creative studio blending cinematic storytelling with high-impact digital content, known for bold visuals, culture-driven narratives, and a rapidly growing multi-platform presence.",
+        links: [
+          {
+            kind: "website",
+            href: "https://twelve-midnight.com/",
+            label: "Website",
+          },
+          {
+            kind: "youtube",
+            href: "https://www.youtube.com/channel/UCbZG9O9QuR7v6RxT4Fh8krw",
+            label: "YouTube",
+          },
+          {
+            kind: "facebook",
+            href: "https://www.facebook.com/twlvmidnight",
+            label: "Facebook",
+          },
+          {
+            kind: "instagram",
+            href: "https://www.instagram.com/twlvmidnight/",
+            label: "Instagram",
+          },
+          {
+            kind: "tiktok",
+            href: "https://www.tiktok.com/@twlvmidnight",
+            label: "TikTok",
           },
         ],
       },

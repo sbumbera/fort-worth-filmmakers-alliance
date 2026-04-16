@@ -125,10 +125,25 @@ function clampDayOfMonth(year: number, month0: number, dayOfMonth: number) {
 function isNthDowOfMonth(date: Date, nth: number, weekday: number) {
   if (date.getDay() !== weekday) return false;
 
-  // 1st/2nd/3rd/4th/5th <weekday> in this month
   const dayOfMonth = date.getDate();
-  const occurrence = Math.floor((dayOfMonth - 1) / 7) + 1;
-  return occurrence === nth;
+
+  if (nth > 0) {
+    const occurrence = Math.floor((dayOfMonth - 1) / 7) + 1;
+    return occurrence === nth;
+  }
+
+  if (nth < 0) {
+    const lastDayOfMonth = new Date(
+      date.getFullYear(),
+      date.getMonth() + 1,
+      0,
+    ).getDate();
+
+    const reverseOccurrence = Math.floor((lastDayOfMonth - dayOfMonth) / 7) + 1;
+    return reverseOccurrence === Math.abs(nth);
+  }
+
+  return false;
 }
 
 function includesMonth(months: number[] | undefined, month0: number) {

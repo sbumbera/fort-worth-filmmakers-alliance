@@ -342,6 +342,7 @@ export const MEMBERS: Member[] = [
     location: "Granbury",
     roles: [
       "Cinematographer",
+      "Director of Photography (DP)",
       "Camera Operator",
       "1st AC",
       "Gaffer",
@@ -381,6 +382,75 @@ export const MEMBERS: Member[] = [
       {
         kind: "email",
         href: "mailto:info@PaulMichaelPhotography.com",
+        label: "Email",
+      },
+    ],
+  },
+  {
+    name: "Hayden Cornelius",
+    location: "Fort Worth",
+    roles: ["Production Assistant (PA)"],
+    bio: "Hayden Cornelius is a Fort Worth based filmmaker, photographer, and UNT graduate with professional experience shooting commercial advertisements, short films, music videos, and creative photography. He has also expanded his on-set skills into the world of grip and electric roles through the Fort Worth Film Collaborative Certification Program.",
+    image: {
+      src: "/members/h-cornelius.jpg",
+      alt: "Hayden Cornelius",
+    },
+    links: [
+      {
+        kind: "instagram",
+        href: "https://www.instagram.com/thecornelius_/",
+        label: "Instagram",
+      },
+      {
+        kind: "youtube",
+        href: "https://www.youtube.com/@HaydenCornelius",
+        label: "YouTube",
+      },
+      {
+        kind: "email",
+        href: "mailto:hayden.corn@yahoo.com",
+        label: "Email",
+      },
+    ],
+  },
+  {
+    name: "Emmanuel Carlos",
+    location: "Dallas",
+    roles: ["Producer", "Director", "Actor", "Production Assistant (PA)"],
+    bio: "Emmanuel Carlos is a director and producer who built his filmmaking foundation through years of hands-on work both behind the camera and on set. He’s worked at Paramount Studios in the Locations Department and has produced several independent projects that have tested his creativity and leadership. Emmanuel is well-rounded on set; comfortable jumping in as a PA, supporting any department, and keeping production moving smoothly. He owns his own gear, continues to develop new directing and producing work, and is now stepping into acting to expand the way he tells stories.",
+    image: {
+      src: "/members/e-carlos.jpeg", // update if your actual filename differs
+      alt: "Emmanuel Carlos",
+    },
+    links: [
+      {
+        kind: "website",
+        href: "https://www.emenproductions.com/",
+        label: "Website",
+      },
+      {
+        kind: "instagram",
+        href: "https://www.instagram.com/emen.productions/",
+        label: "Production IG",
+      },
+      {
+        kind: "instagram",
+        href: "https://www.instagram.com/emanuel_car14/",
+        label: "Personal IG",
+      },
+      {
+        kind: "youtube",
+        href: "https://www.youtube.com/@e-menproductions",
+        label: "YouTube",
+      },
+      {
+        kind: "phone",
+        href: "tel:+18173536141",
+        label: "(817) 353-6141",
+      },
+      {
+        kind: "email",
+        href: "mailto:emmanuelc@emenproductions.com",
         label: "Email",
       },
     ],

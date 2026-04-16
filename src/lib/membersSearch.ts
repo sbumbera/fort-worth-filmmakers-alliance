@@ -29,6 +29,10 @@ function escapeRegex(s: string) {
  * - Searching "acting" should match Actor + Actress
  * - Searching "actor" matches Actor
  * - Searching "actress" matches Actress
+ *
+ * DP / Cinematographer policy:
+ * - Director of Photography (DP) and Cinematographer are treated as the same role
+ * - Searching either term should match both
  */
 const ROLE_ALIASES: Record<string, string[]> = {
   actor: ["acting"],
@@ -47,8 +51,14 @@ const ROLE_ALIASES: Record<string, string[]> = {
   writer: ["writing"],
   screenwriter: ["screenwriting"],
 
-  "director of photography (dp)": ["dp", "dop", "director of photography"],
-  cinematographer: ["cinematography", "cinema"],
+  "director of photography (dp)": [
+    "dp",
+    "dop",
+    "director of photography",
+    "cinematographer",
+    "cinematography",
+    "cinema",
+  ],
   "camera operator": ["cam op", "camera op"],
   "steadicam operator": ["steadicam"],
   "1st assistant camera (1st ac)": ["1st ac", "first ac", "ac"],
@@ -121,8 +131,19 @@ const ROLE_ALIASES: Record<string, string[]> = {
 
 function canonicalizeRoleForSearch(role: string) {
   const r = normalize(role);
+
   if (r.includes("actress")) return "actress";
   if (r.includes("actor")) return "actor";
+
+  if (
+    r.includes("director of photography") ||
+    r === "dp" ||
+    r === "dop" ||
+    r.includes("cinematographer")
+  ) {
+    return "director of photography (dp)";
+  }
+
   return r;
 }
 
@@ -170,6 +191,8 @@ export function useFilteredMembers({
 }) {
   return useMemo(() => {
     const q = normalize(query);
+    const normalizedRole =
+      role === "All roles" ? role : canonicalizeRoleForSearch(role);
 
     return members
       .filter((m) => {
@@ -177,7 +200,7 @@ export function useFilteredMembers({
           role === "All roles"
             ? true
             : m.roles.some(
-                (r) => canonicalizeRoleForSearch(r) === normalize(role)
+                (r) => canonicalizeRoleForSearch(r) === normalizedRole,
               );
 
         const tokens = roleTokens(m.roles);
