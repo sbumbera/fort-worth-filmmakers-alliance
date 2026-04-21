@@ -118,6 +118,7 @@ const ROLE_GROUPS: RoleGroup[] = [
       "Producer",
       "Production Accountant",
       "Production Assistant (PA)",
+      "Office PA",
       "Production Coordinator",
       "Production Secretary",
       "Safety Officer",

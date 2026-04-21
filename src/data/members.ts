@@ -37,7 +37,7 @@ export const MEMBERS: Member[] = [
   {
     name: "Steven 'Jesse Lee' Bumbera",
     location: "Fort Worth",
-    roles: ["Actor", "Writer", "Production Assistant (PA)"],
+    roles: ["Actor", "Writer", "Production Assistant (PA)", "Office PA"],
     bio: "Marine veteran, software engineer and entrepreneur with a strong foundation in discipline, leadership, and execution. Actor and writer with extensive experience in short-form narrative projects, currently building toward producing through hands-on work as a production assistant.",
     image: {
       src: "/members/s-bumbera.jpeg",
@@ -451,6 +451,28 @@ export const MEMBERS: Member[] = [
       {
         kind: "email",
         href: "mailto:emmanuelc@emenproductions.com",
+        label: "Email",
+      },
+    ],
+  },
+  {
+    name: "Cecilia Mejia",
+    location: "Fort Worth",
+    roles: ["Production Assistant (PA)", "Office PA", "Grip"],
+    bio: "Cecilia “Cici” Mejia is an aspiring filmmaker in the DFW area who is passionate about storytelling and the collaborative nature of film. She trained through the Tarrant County College Fort Worth Film Collaborative Grip & Lighting Certification Program, where she developed foundational skills in lighting, set safety, and production workflow. She recently participated in a student 48-hour film project and is the Co-Director and Co-Director of Photography on her first independent short film for the Texas Horror Cult Film Competition. Cici enjoys being a helping hand on set and values supporting others in bringing ideas to life. She is actively seeking opportunities to work on film sets or in production environments and is open to any role where she can learn, grow, and contribute to the filmmaking process.",
+    image: {
+      src: "/members/c-mejia.jpg", // update if your actual filename differs
+      alt: "Cecilia Mejia",
+    },
+    links: [
+      {
+        kind: "instagram",
+        href: "https://www.instagram.com/ceciliamejia126/?hl=en",
+        label: "Instagram",
+      },
+      {
+        kind: "email",
+        href: "mailto:ceciliamejia126@gmail.com",
         label: "Email",
       },
     ],
