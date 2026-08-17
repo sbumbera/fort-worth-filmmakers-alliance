@@ -24,7 +24,6 @@ const DEFAULT_NAV: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
   { label: "Events", href: "/events" },
-  { label: "Local Roster", href: "/roster" },
   { label: "Directory", href: "/directory" },
   { label: "Tools", href: "/tools" },
 ];
